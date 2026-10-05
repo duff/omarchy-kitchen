@@ -64,3 +64,16 @@ test_a_cookbook_not_fetched_yet_is_reported() {
   output=$("$KITCHEN" pending --repo "$REPO" --profile "$TEST_TMP/profile.json" 2>&1)
   assert_has "$output" "sam/omarchy-cookbook isn't fetched yet"
 }
+
+test_later_comes_before_never_reached_and_left_out_drops_out() {
+  setup_following
+  set_bookmark
+  jq '.later = [{"id": "sam/plain-one", "version": 1, "date": "2026-10-05"}]
+      | .left_out = [{"id": "sam/tap-to-click", "version": 1, "why": "already handled"}]' \
+    "$REPO/kitchen/review.json" >"$TEST_TMP/r" && mv "$TEST_TMP/r" "$REPO/kitchen/review.json"
+  output=$(pending)
+  assert_eq $'later\tyes\tsam/omarchy-cookbook\tplain-one\tsam/plain-one\t1' "$output"
+  sed -i 's/"version": 1/"version": 2/' "$BOOK/recipes/tap-to-click/RECIPE.md"
+  git -C "$BOOK" commit -qam "Change tap-to-click"
+  assert_has "$(pending)" $'^new\tyes\tsam/omarchy-cookbook\ttap-to-click\tsam/tap-to-click\t2$'
+}

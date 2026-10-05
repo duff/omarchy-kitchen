@@ -1,14 +1,15 @@
 #!/bin/bash
 
 # kitchen pending [--repo DIR] [--profile FILE]: the recipes from followed
-# cookbooks this person might want, one per line, new ones first:
+# cookbooks this person might want, one per line:
 #
-#   new|older <TAB> yes|maybe <TAB> <owner/repo> <TAB> <folder> <TAB> <id> <TAB> <version>
+#   new|later|older <TAB> yes|maybe <TAB> <owner/repo> <TAB> <folder> <TAB> <id> <TAB> <version>
 #
-# "new" means added or changed since the last review read that cookbook;
-# "older" means offered before, or not yet reached, and still undecided.
-# Leaves out recipes applied or declined at this version, and ones that
-# don't fit this machine. Reads the fetched cookbooks only; fetch first.
+# "new" means added or changed since the last review read that cookbook,
+# "later" means the person put it off, and "older" means never reached. They
+# come in that order. Leaves out recipes applied, declined, or left out at
+# this version, and ones that don't fit this machine. Reads the fetched
+# cookbooks only; fetch first.
 
 set -o pipefail
 source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
@@ -30,6 +31,7 @@ cache=$(kitchen_expand "$(jq -r '.cache' <<<"$settings")")
 review="$repo/kitchen/review.json"
 
 new=()
+later=()
 older=()
 while IFS= read -r cookbook; do
   [[ -n $cookbook ]] || continue
@@ -55,7 +57,7 @@ while IFS= read -r cookbook; do
 
     record="$repo/kitchen/applied/${id/\//--}.json"
     [[ -f $record && $(jq -r '.version' "$record") == "$version" ]] && continue
-    jq -e --arg id "$id" --argjson v "$version" 'any(.declined[]?; .id == $id and .version == $v)' "$review" >/dev/null && continue
+    jq -e --arg id "$id" --argjson v "$version" 'any(.declined[]?, .left_out[]?; .id == $id and .version == $v)' "$review" >/dev/null && continue
 
     fit=$("$KITCHEN_ROOT/bin/kitchen-match" "$dir/recipes/$folder" --profile "$profile_file" | head -n1)
     [[ $fit == no ]] && continue
@@ -63,6 +65,8 @@ while IFS= read -r cookbook; do
     line=$(printf '%s\t%s\t%s\t%s\t%s' "$fit" "$cookbook" "$folder" "$id" "$version")
     if [[ -z $bookmark ]] || grep -qxF -- "$folder" <<<"$changed"; then
       new+=("new	$line")
+    elif jq -e --arg id "$id" --argjson v "$version" 'any(.later[]?; .id == $id and .version == $v)' "$review" >/dev/null; then
+      later+=("later	$line")
     else
       older+=("older	$line")
     fi
@@ -70,5 +74,6 @@ while IFS= read -r cookbook; do
 done < <(jq -r '(.following // [])[]' <<<"$settings")
 
 ((${#new[@]})) && printf '%s\n' "${new[@]}"
+((${#later[@]})) && printf '%s\n' "${later[@]}"
 ((${#older[@]})) && printf '%s\n' "${older[@]}"
 exit 0

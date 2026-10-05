@@ -2,5 +2,7 @@
   "last_review": null,
   "reviewed_through": null,
   "cookbooks": {},
-  "declined": []
+  "declined": [],
+  "later": [],
+  "left_out": []
 }

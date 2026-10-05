@@ -61,19 +61,26 @@ git -C "$dir" reset --quiet --hard origin/HEAD   # the cache holds no work of yo
 ```
 
 Then run `kitchen pending`.
-- **What it lists:** the recipes still to decide on, new or changed ones first. It already leaves out what's applied or declined at that version, and what doesn't fit this machine.
-- **What `older` means:** recipes the person put off, or never reached. They stay available until decided.
+- **What it lists:** the recipes still to decide on. It already leaves out what's applied, declined, or left out at that version, and what doesn't fit this machine.
+- **The order it lists them in:**
+  - `new`: added or changed since the last review
+  - `later`: the person put them off
+  - `older`: never reached. They stay available until decided.
 - **A recipe that newly fits:** after a new monitor or program, it shows up again on its own.
 - **Run `kitchen check <dir>` on each cookbook once.** Leave out recipes it reports problems with.
 
-Just before you offer each recipe, not all of them up front:
+**First, a quick pass over all of them,** to put them in order. Read each one's title, `applies_to`, and Problem.
+- **Plainly not for them?** Leave out anything for a setup they clearly don't have, like a gaming mouse or a laptop docked with the lid shut.
+- **Order the rest:** problems they're likely to hit first, then matters of taste.
 
-- **Is it plainly not for them?** Read its `applies_to` and Problem. Leave out anything for a setup they clearly don't have, like a gaming mouse or a laptop docked with the lid shut, and keep a short reason.
-- **Do they already handle it?** Compare its `touches` and fix with their private repo. If they already customize the same thing, say what they have and how the recipe differs, or leave it out if it adds nothing.
-- **Is it safe?** Give it a safety review ([safety.md](safety.md)), or reuse its saved verdict (see "Verdicts" below). Never offer a `reject`; note it for the end.
+**Then, just before you offer each recipe:**
+- **Do they already handle it?** Compare its `touches` and fix with their private repo. If they already customize the same thing, say what they have and how the recipe differs. Leave it out if it adds nothing.
+- **Is it safe?** Give it a safety review ([safety.md](safety.md)), or reuse its saved verdict (see "Verdicts" below). Never offer a `reject`.
 - **How would you do it here?** If your way differs from the recipe, plan to say so.
 
-Doing this one recipe at a time keeps the person from waiting, and no review is spent on recipes they never get to.
+Doing the safety reviews one recipe at a time keeps the person from waiting, and no review is spent on recipes they never get to.
+
+**Every recipe you leave out** goes in `left_out` in review.json, as `{id, version, why}`. The reason is short: "doesn't fit: no gaming mouse", "already handled: your own keyd setup", or "failed the safety check: reads ~/.ssh". It isn't offered, counted, or named again unless the recipe changes.
 
 ### 4. Upkeep
 
@@ -99,9 +106,9 @@ The first time (`last_review` is empty), add that this review comes back once a 
 **Order:**
 1. the method update
 2. their changes worth sharing
-3. new and changed recipes from cookbooks they follow, most useful first: bugs and problems they're likely to hit, then matters of taste
+3. new and changed recipes from cookbooks they follow, in the order from your quick pass
 4. upkeep
-5. Then, if `kitchen pending` listed `older` recipes, ask whether to keep going: "There are 30 more from earlier you haven't decided on. Keep going, or leave them for another time?"
+5. Then, if `kitchen pending` listed `later` or `older` recipes, ask whether to keep going: "There are 12 more from earlier you haven't decided on. Keep going, or leave them for another time?" Go through the `later` ones first.
 
 **Each item is written for a person, not a system:**
 - **A heading:** the problem, as they'd say it. The recipe's title usually works.
@@ -133,13 +140,13 @@ Their own changes read the same way: "On Oct 4 you made the mouse less jumpy. Wo
     - Set `"method": "<tag>"` in `kitchen/settings.json`.
     - If the changelog says cookbooks must change, say so when you explain the update, so their yes covers it too. Then, in the same step, convert their cookbook, set `kitchen` in `cookbook.json` and the version in its check workflow, run `kitchen check`, and commit and push the cookbook.
 - **Skip:** for a recipe, add `{id, version, date, why}` to `declined` in review.json, so it isn't offered again until its version changes. For a method update, set `"method_declined": "<tag>"`; a newer version asks again.
-- **Later:** record nothing. It comes back next time.
+- **Later:** add `{id, version, date}` to `later` in review.json. It comes back first next time, ahead of recipes never reached.
 - **A question, or "tell me more":** answer from the recipe and their machine. Show the recipe's actual change, or the whole recipe if they want it. Give the link only if they ask. Then offer the choices again.
 - **Stop:** everything not reached waits for next time.
 
 **At the end,** in a few lines:
 - what was applied, published, skipped, or left for later
-- what you left out without asking. Name each one by its problem (the recipe's title is written that way), then say why in a few words, so the person can tell whether it matters to them:
+- what you left out today, by judgment or for safety. Name each one by its problem (the recipe's title is written that way), then say why in a few words, so the person can tell whether it matters to them:
 
   > Left out, since they don't seem to fit you:
   > - Gaming mouse moves the cursor too fast to place it precisely: you don't have a gaming mouse.
@@ -149,6 +156,7 @@ Their own changes read the same way: "On Oct 4 you made the mouse less jumpy. Wo
   > If any of these does matter to you, say so and we'll look at it.
 
   When there are many, group them under each reason. Name every recipe that failed the safety check, and say why.
+- recipes `kitchen match` ruled out that are new since the last review, as one line by what they need: "18 more need programs or hardware you don't have: Voxtype (5), Herdr (4), Wine (2), and 7 others. Say "show me" for the list."
 
 ## Finishing
 
@@ -157,6 +165,6 @@ Update `kitchen/review.json`:
 - `last_review`: today
 - `reviewed_through`: the private repo's `HEAD` before any commits this review made
 - `cookbooks`: for each followed cookbook, the commit you read up to. `kitchen pending` uses it to tell new recipes from older ones; undecided recipes stay available either way.
-- `declined`: as above
+- `declined`, `later`, and `left_out`: as above. Drop any `later` entry the person has now applied or declined.
 
 Then remove the snooze with `kitchen snooze --clear`. Commit and push `kitchen/review.json`, with any applied recipes in their own commits. Doing the review was the ask. Committing review.json is how the other machines learn the review is done.
