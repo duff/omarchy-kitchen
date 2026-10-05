@@ -1,22 +1,3 @@
----
-{
-  "id": "sam/natural-scrolling-feels-backwards",
-  "title": "Scrolling feels backwards on the touchpad",
-  "summary": "Turn on natural scrolling for the touchpad.",
-  "version": 1,
-  "tested_on": {"omarchy": "4.0.4", "hyprland": "0.56.2"},
-  "applies_to": "Laptops.",
-  "requires": [{"laptop": true}],
-  "touches": ["~/.config/hypr/input.lua"],
-  "root": false,
-  "network": false,
-  "installs": [],
-  "runs": [],
-  "agent_config": false,
-  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
-}
----
-
 # Scrolling feels backwards on the touchpad
 
 ## Problem
@@ -52,3 +33,24 @@ Delete the line from `~/.config/hypr/input.lua` and run `hyprctl reload`.
 ## History
 
 - Created by [@sam](https://github.com/sam) on 2026-09-20.
+
+## Recipe data
+
+```json
+{
+  "id": "sam/natural-scrolling-feels-backwards",
+  "title": "Scrolling feels backwards on the touchpad",
+  "summary": "Turn on natural scrolling for the touchpad.",
+  "version": 1,
+  "tested_on": {"omarchy": "4.0.4", "hyprland": "0.56.2"},
+  "applies_to": "Laptops.",
+  "requires": [{"laptop": true}],
+  "touches": ["~/.config/hypr/input.lua"],
+  "root": false,
+  "network": false,
+  "installs": [],
+  "runs": [],
+  "agent_config": false,
+  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
+}
+```

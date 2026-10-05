@@ -1,5 +1,5 @@
-# Checks a recipe's JSON header against format.md, and prints one problem
-# per line. Run with --arg folder <recipe folder name> --arg owner <cookbook
+# Checks a recipe's data (the JSON under "## Recipe data") against
+# format.md, and prints one problem per line. Run with --arg folder <recipe folder name> --arg owner <cookbook
 # owner, or "">.
 
 def one_line: type == "string" and test("\\S") and (test("\n") | not);
@@ -55,7 +55,7 @@ def history_order($id; $owner):
       then "the id has to start with \($author.who)/, who \($author.did) this version" else empty end;
 
 if type != "object" then
-  "the header has to be a JSON object"
+  "the recipe data has to be a JSON object"
 else
   . as $h
   | ((keys - fields) as $unknown

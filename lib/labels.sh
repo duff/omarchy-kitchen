@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# A recipe's header declares what its fix does: root, network, installs,
+# A recipe's data declares what its fix does: root, network, installs,
 # runs, agent_config. These Perl-style patterns (grep -P) spot those things
 # in the fix's code, so a recipe can't do more than its labels say.
 
@@ -31,10 +31,10 @@ declare -A LABEL_MEANS=(
 )
 
 # Prints "label<TAB>evidence" for each label the fix's code needs.
-#   kitchen_labels_needed <recipe-dir> <header-json>
+#   kitchen_labels_needed <recipe-dir> <data-json>
 kitchen_labels_needed() {
-  local dir=$1 header=$2 label sections line touches all forward all_fenced forward_fenced
-  touches=$(jq -r '(.touches // [])[] | strings' <<<"$header")
+  local dir=$1 data=$2 label sections line touches all forward all_fenced forward_fenced
+  touches=$(jq -r '(.touches // [])[] | strings' <<<"$data")
   all=$(kitchen_code "$dir")
   forward=$(kitchen_code "$dir" --forward)
   all_fenced=$(kitchen_code "$dir" --no-inline)
@@ -58,14 +58,14 @@ kitchen_labels_needed() {
 
 # Plain-language problems where the code does more than the labels say.
 kitchen_label_mismatches() {
-  local dir=$1 header=$2 label evidence declared
+  local dir=$1 data=$2 label evidence declared
   while IFS=$'\t' read -r label evidence; do
     if [[ $label == installs || $label == runs ]]; then
-      declared=$(jq -r --arg l "$label" '(.[$l] // []) | if type == "array" and length > 0 then "yes" else "no" end' <<<"$header")
+      declared=$(jq -r --arg l "$label" '(.[$l] // []) | if type == "array" and length > 0 then "yes" else "no" end' <<<"$data")
       [[ $declared == yes ]] || echo "the fix ${LABEL_MEANS[$label]} (\`$evidence\`), so \`$label\` has to list it"
     else
-      declared=$(jq -r --arg l "$label" 'if .[$l] == true then "yes" else "no" end' <<<"$header")
+      declared=$(jq -r --arg l "$label" 'if .[$l] == true then "yes" else "no" end' <<<"$data")
       [[ $declared == yes ]] || echo "the fix ${LABEL_MEANS[$label]} (\`$evidence\`), so \`$label\` has to be true"
     fi
-  done < <(kitchen_labels_needed "$dir" "$header")
+  done < <(kitchen_labels_needed "$dir" "$data")
 }

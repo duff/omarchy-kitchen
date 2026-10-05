@@ -106,7 +106,10 @@ The person can answer per item ("1 yes, 2 yes, 4 skip, 5 later") or in bulk ("al
 
 ## Doing the answers
 
-- **Yes to a method update**: `git -C ~/.local/share/omarchy-kitchen checkout --quiet <tag>`, then run `~/.local/share/omarchy-kitchen/install`. Set `"method": "<tag>"` in `kitchen/settings.json`.
+- **Yes to a method update**: `git -C ~/.local/share/omarchy-kitchen checkout --quiet <tag>`, then run `~/.local/share/omarchy-kitchen/install`. Set `"method": "<tag>"` in `kitchen/settings.json`. If the changelog says cookbooks must change, say so when you explain the update, so their yes covers it too. Then, in the same step:
+  - convert their cookbook
+  - set `kitchen` in `cookbook.json` and the version in its check workflow
+  - run `kitchen check`, then commit and push the cookbook
 - **No to a method update**: set `"method_declined": "<tag>"` in review.json. A newer tag asks again, showing the changes since the adopted version.
 - **Yes to publishing**: follow [publish.md](publish.md). The yes covers committing and pushing that change to the cookbook; don't ask again.
 - **Yes to applying**: follow [apply.md](apply.md), one recipe at a time.

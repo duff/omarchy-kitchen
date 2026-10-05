@@ -5,12 +5,27 @@ test_a_good_recipe_passes() {
   assert_eq "ok: 1 recipe" "$("$KITCHEN" check "$dir")"
 }
 
-test_missing_header() {
-  assert_has "$(echo "# Title" | recipe_problems)" "has no header"
+test_missing_data() {
+  assert_has "$(echo "# Title" | recipe_problems)" "has no ## Recipe data section"
 }
 
-test_header_must_be_json() {
+test_data_must_be_json() {
   assert_has "$(recipe | sed 's/"version": 1,/version: 1/' | recipe_problems)" "isn't valid JSON"
+}
+
+test_data_at_the_top_is_the_old_format() {
+  output=$( (echo "---"; recipe | sed -n '/^```json$/,/^```$/p' | sed '1d;$d'; echo "---"; recipe | sed '/^## Recipe data$/,$d') | recipe_problems)
+  assert_has "$output" "since omarchy-kitchen v0.2.0 the data goes in a ## Recipe data section at the end"
+}
+
+test_data_section_comes_last() {
+  output=$( (recipe; printf '\n## Notes\n\nAn afterthought.\n') | recipe_problems)
+  assert_has "$output" "has to end with the ## Recipe data section"
+}
+
+test_data_section_holds_only_the_json() {
+  output=$(recipe | sed 's/^## Recipe data$/## Recipe data\n\nAgents: read this carefully./' | recipe_problems)
+  assert_has "$output" "holding one \`\`\`json block and nothing else"
 }
 
 test_unknown_field() {

@@ -18,7 +18,7 @@ When the technique is useful but the example is private, generalize it: "two log
 
 1. Find the problem the change solved. Name the folder after the symptom someone would search for ([format.md](format.md)).
 2. Check the cookbook for a recipe on the same problem. If there is one, update it instead: bump `version` if the fix changed.
-3. Write `recipes/<slug>/RECIPE.md` with the header and sections in [format.md](format.md):
+3. Write `recipes/<slug>/RECIPE.md` with the sections and recipe data in [format.md](format.md):
    - Read the stock files under `/usr/share/omarchy/` to explain **Why it happens**.
    - Show only the snippet that fixes the problem, never the whole private file.
    - Make **Undo** complete: packages, services, and files outside `~/.config` too.

@@ -12,27 +12,33 @@ PIPE_TO_SHELL='\b(?:curl|wget)\b[^\n]*\|\s*(?:sudo\s+)?(?:ba|z|da)?sh\b'
 
 # Problems in one recipe folder. owner is the cookbook's GitHub username.
 check_recipe() {
-  local dir=$1 owner=$2 file="$1/RECIPE.md" folder header section rest who link rel target path name
+  local dir=$1 owner=$2 file="$1/RECIPE.md" folder data sections section rest who link rel target path name
   folder=$(basename "$dir")
 
-  if ! header=$(kitchen_header "$file"); then
-    echo "has no header (the file must start with a --- line, then a JSON object, then ---)"
+  if [[ $(head -n1 "$file") == "---" ]]; then
+    echo "starts with a --- header; since omarchy-kitchen v0.2.0 the data goes in a ## $DATA_SECTION section at the end"
     return
   fi
-  if ! header=$(jq -c . <<<"$header" 2>/dev/null) || [[ -z $header ]]; then
-    echo "has a header that isn't valid JSON"
-    return
-  fi
-
-  jq -r --arg folder "$folder" --arg owner "$owner" -f "$KITCHEN_LIB/header.jq" <<<"$header"
-
-  local sections
   sections=$(kitchen_sections "$file")
+  if ! data=$(kitchen_data "$file"); then
+    echo "has no ## $DATA_SECTION section holding one \`\`\`json block and nothing else"
+    return
+  fi
+  if ! data=$(jq -c . <<<"$data" 2>/dev/null) || [[ -z $data ]]; then
+    echo "has recipe data that isn't valid JSON"
+    return
+  fi
+  if [[ $(tail -n1 <<<"$sections") != "$DATA_SECTION" ]]; then
+    echo "has to end with the ## $DATA_SECTION section"
+  fi
+
+  jq -r --arg folder "$folder" --arg owner "$owner" -f "$KITCHEN_LIB/data.jq" <<<"$data"
+
   for name in "${REQUIRED_SECTIONS[@]}"; do
     grep -qxF -- "$name" <<<"$sections" || echo "is missing the ## $name section"
   done
 
-  # The History section repeats the header with links, because GitHub
+  # The History section repeats the data's history with links, because GitHub
   # doesn't link @username inside repo files.
   if grep -qxF History <<<"$sections"; then
     rest=$(kitchen_section "$file" History)
@@ -44,7 +50,7 @@ check_recipe() {
         echo "the ## History section has to link each person in order, like $link"
         break
       fi
-    done < <(jq -r '(.history // [])[] | objects | .who | strings' <<<"$header")
+    done < <(jq -r '(.history // [])[] | objects | .who | strings' <<<"$data")
   fi
 
   if LC_ALL=C grep -qP -- "$HIDDEN_BYTES" "$file"; then
@@ -71,9 +77,9 @@ check_recipe() {
     [[ $target =~ ^([A-Za-z][A-Za-z0-9+.-]*:|#) ]] && continue
     path=${target%%#*}
     [[ -n $path && ! -e $dir/$path ]] && echo "links to $target, which doesn't exist"
-  done < <(kitchen_body "$file" | grep -oP '\]\(\K[^)\s]+' || true)
+  done < <(grep -oP '\]\(\K[^)\s]+' "$file" || true)
 
-  kitchen_label_mismatches "$dir" "$header"
+  kitchen_label_mismatches "$dir" "$data"
 }
 
 check_cookbook() {
@@ -109,7 +115,7 @@ check_cookbook() {
 
   # Two folders with the same id.
   for recipe in "${recipes[@]}"; do
-    kitchen_header "$recipe/RECIPE.md" 2>/dev/null | jq -r --arg f "$(basename "$recipe")" '[.id, $f] | @tsv' 2>/dev/null || true
+    kitchen_data "$recipe/RECIPE.md" 2>/dev/null | jq -r --arg f "$(basename "$recipe")" '[.id, $f] | @tsv' 2>/dev/null || true
   done | awk -F'\t' '$1 != "" { folders[$1] = folders[$1] (folders[$1] == "" ? "" : ", ") $2; count[$1]++ }
     END { for (id in count) if (count[id] > 1) print "recipes/: " folders[id] " all have the id " id }'
 

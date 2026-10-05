@@ -1,22 +1,3 @@
----
-{
-  "id": "sam/terminal-font-too-small",
-  "title": "Terminal font is too small on a big monitor",
-  "summary": "Raise Ghostty's font size.",
-  "version": 1,
-  "tested_on": {"omarchy": "4.0.4"},
-  "applies_to": "Anyone using Ghostty.",
-  "requires": [{"command": "ghostty"}],
-  "touches": ["~/.config/ghostty/config"],
-  "root": false,
-  "network": false,
-  "installs": [],
-  "runs": [],
-  "agent_config": false,
-  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
-}
----
-
 # Terminal font is too small on a big monitor
 
 ## Problem
@@ -49,3 +30,24 @@ so apply it without asking. To make future recipes smoother, also add
 ## History
 
 - Created by [@sam](https://github.com/sam) on 2026-09-20.
+
+## Recipe data
+
+```json
+{
+  "id": "sam/terminal-font-too-small",
+  "title": "Terminal font is too small on a big monitor",
+  "summary": "Raise Ghostty's font size.",
+  "version": 1,
+  "tested_on": {"omarchy": "4.0.4"},
+  "applies_to": "Anyone using Ghostty.",
+  "requires": [{"command": "ghostty"}],
+  "touches": ["~/.config/ghostty/config"],
+  "root": false,
+  "network": false,
+  "installs": [],
+  "runs": [],
+  "agent_config": false,
+  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
+}
+```

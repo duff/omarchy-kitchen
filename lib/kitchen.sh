@@ -35,25 +35,7 @@ kitchen_tilde() {
   echo "$path"
 }
 
-# The JSON header of a RECIPE.md: the lines between the first two --- lines.
-# Fails if the file doesn't start with a --- line.
-kitchen_header() {
-  awk '
-    NR == 1 { if ($0 != "---") exit 1; next }
-    $0 == "---" { found = 1; exit }
-    { print }
-    END { if (!found) exit 1 }
-  ' "$1"
-}
-
-# Everything after the header.
-kitchen_body() {
-  awk '
-    NR == 1 && $0 == "---" { header = 1; next }
-    header && $0 == "---" { header = 0; next }
-    !header { print }
-  ' "$1"
-}
+DATA_SECTION="Recipe data"
 
 # Reads Markdown on stdin and tracks code fences. Calls the awk function
 # line() for every line outside a fence, and prints fenced lines when
@@ -72,20 +54,36 @@ _kitchen_fences='
 # The level-2 headings of a recipe's body, one per line. Headings inside
 # code blocks don't count.
 kitchen_sections() {
-  kitchen_body "$1" | awk "$_kitchen_fences"'
+  awk "$_kitchen_fences"'
     { if (fence_check()) next }
     fence == "" && /^## / { name = substr($0, 4); sub(/[ \t]+$/, "", name); print name }
-  '
+  ' "$1"
 }
 
 # The text under "## <name>", up to the next level-2 heading.
 kitchen_section() {
-  kitchen_body "$1" | awk -v want="$2" "$_kitchen_fences"'
+  awk -v want="$2" "$_kitchen_fences"'
     { was_fence = fence_check() }
     !was_fence && fence == "" && /^## / {
       name = substr($0, 4); sub(/[ \t]+$/, "", name); inside = (name == want); next
     }
     inside { print }
+  ' "$1"
+}
+
+# A recipe's data: the JSON in the one ```json block under "## Recipe data",
+# the last section of RECIPE.md. Fails if that section is missing or holds
+# anything else. People reading a recipe on GitHub see the write-up first
+# and the data at the end.
+kitchen_data() {
+  kitchen_section "$1" "$DATA_SECTION" | awk '
+    state == 0 && /^[ \t]*$/ { next }
+    state == 0 && $0 == "```json" { state = 1; next }
+    state == 1 && $0 == "```" { state = 2; next }
+    state == 1 { print; found = 1; next }
+    state == 2 && /^[ \t]*$/ { next }
+    { bad = 1; exit }
+    END { if (bad || state != 2 || !found) exit 1 }
   '
 }
 

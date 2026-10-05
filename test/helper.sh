@@ -27,32 +27,11 @@ assert_lacks() {
   ! grep -qE -- "$2" <<<"$1" || fail "expected no line matching: $2"$'\n'"in:"$'\n'"$1"
 }
 
-# A RECIPE.md that passes every check. An optional jq filter changes the
-# header, like recipe '.root = true'.
+# A RECIPE.md that passes every check. An optional jq filter changes its
+# data, like recipe '.root = true'.
 recipe() {
   local filter=${1:-.}
-  echo "---"
-  jq "$filter" <<'EOF'
-{
-  "id": "duff/touchpad-taps-click-things",
-  "title": "Touchpad taps click things",
-  "summary": "Turn off tap-to-click.",
-  "version": 1,
-  "tested_on": {"omarchy": "4.0.4", "hyprland": "0.56.2"},
-  "applies_to": "Laptops.",
-  "requires": [{"laptop": true}],
-  "touches": ["~/.config/hypr/input.lua"],
-  "root": false,
-  "network": false,
-  "installs": [],
-  "runs": [],
-  "agent_config": false,
-  "history": [{"who": "duff", "did": "created", "date": "2026-10-01"}]
-}
-EOF
   cat <<'EOF'
----
-
 # Touchpad taps click things
 
 ## Problem
@@ -78,7 +57,30 @@ Delete the line and run `hyprctl reload`.
 ## History
 
 - Created by [@duff](https://github.com/duff) on 2026-10-01.
+
+## Recipe data
+
+```json
 EOF
+  jq "$filter" <<'EOF'
+{
+  "id": "duff/touchpad-taps-click-things",
+  "title": "Touchpad taps click things",
+  "summary": "Turn off tap-to-click.",
+  "version": 1,
+  "tested_on": {"omarchy": "4.0.4", "hyprland": "0.56.2"},
+  "applies_to": "Laptops.",
+  "requires": [{"laptop": true}],
+  "touches": ["~/.config/hypr/input.lua"],
+  "root": false,
+  "network": false,
+  "installs": [],
+  "runs": [],
+  "agent_config": false,
+  "history": [{"who": "duff", "did": "created", "date": "2026-10-01"}]
+}
+EOF
+  echo '```'
 }
 
 # A new cookbook holding one recipe, read from stdin, in the given folder

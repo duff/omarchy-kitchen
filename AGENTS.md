@@ -11,7 +11,7 @@ If someone asked you to set them up with Omarchy cookbooks, you're in the wrong 
 - **Keep scripts portable.** Use POSIX awk, not gawk extensions. Use `grep -P` for Perl-style patterns, and match invisible characters as UTF-8 bytes under `LC_ALL=C`.
 - **`bin/kitchen` holds the deterministic parts:** checks, scans, matching, dates. Judgment goes in the skill's guides. If a rule can be checked the same way every time, check it in code and test it.
 - **Keep the guides short and plain.** Each guide covers one task. `SKILL.md` routes to them. `README.md` stays one page, for people.
-- **When you change the format** (`format.md`), change `lib/header.jq` or `bin/kitchen-check` and their tests in the same commit. Say in the changelog what existing cookbooks must change.
+- **When you change the format** (`format.md`), change `lib/data.jq` or `bin/kitchen-check` and their tests in the same commit. Say in the changelog what existing cookbooks must change.
 - **Never weaken safety or privacy quietly:** the safety review, the label checks, the privacy scan, or the rule that nothing is published or applied without a yes. If a change loosens one, say so plainly at the top of its changelog entry.
 
 ## Releasing

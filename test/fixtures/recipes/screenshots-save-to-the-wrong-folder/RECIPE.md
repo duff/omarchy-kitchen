@@ -1,22 +1,3 @@
----
-{
-  "id": "sam/screenshots-save-to-the-wrong-folder",
-  "title": "Screenshots save to the wrong folder",
-  "summary": "Point Omarchy's screenshots at ~/Pictures/Screenshots.",
-  "version": 1,
-  "tested_on": {"omarchy": "4.0.4"},
-  "applies_to": "Every machine.",
-  "requires": [],
-  "touches": ["~/.config/uwsm/env"],
-  "root": false,
-  "network": false,
-  "installs": [],
-  "runs": [],
-  "agent_config": false,
-  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
-}
----
-
 # Screenshots save to the wrong folder
 
 ## Problem
@@ -44,3 +25,24 @@ Delete the line from `~/.config/uwsm/env`, then log out and back in.
 ## History
 
 - Created by [@sam](https://github.com/sam) on 2026-09-20.
+
+## Recipe data
+
+```json
+{
+  "id": "sam/screenshots-save-to-the-wrong-folder",
+  "title": "Screenshots save to the wrong folder",
+  "summary": "Point Omarchy's screenshots at ~/Pictures/Screenshots.",
+  "version": 1,
+  "tested_on": {"omarchy": "4.0.4"},
+  "applies_to": "Every machine.",
+  "requires": [],
+  "touches": ["~/.config/uwsm/env"],
+  "root": false,
+  "network": false,
+  "installs": [],
+  "runs": [],
+  "agent_config": false,
+  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
+}
+```

@@ -10,7 +10,7 @@ omarchy-cookbook/
   cookbook.json        # owner, method version, description, machines
   recipes/
     <slug>/
-      RECIPE.md        # the header and the write-up
+      RECIPE.md        # the write-up, then the recipe data
       files/           # optional: scripts or configs too long to show inline
   .github/workflows/check.yml
 ```
@@ -43,10 +43,24 @@ A recipe applied from someone else's cookbook keeps their slug. If your cookbook
 
 ## RECIPE.md
 
-The file starts with a header: a JSON object between two `---` lines. Write it compactly, with one top-level field per line, and lists and objects on the same line as their field:
+The write-up comes first, for people browsing on GitHub. The last section, `## Recipe data`, holds one JSON code block with the recipe's data for agents and the library, and nothing else. Write the JSON compactly, with one top-level field per line, and lists and objects on the same line as their field:
 
-```markdown
----
+````markdown
+# Workspaces open on unpredictable monitors
+
+## Problem
+## Why it happens
+## Fix
+## Apply and check
+## Undo
+## Notes
+## History
+
+- Created by [@duff](https://github.com/duff) on 2026-10-01.
+
+## Recipe data
+
+```json
 {
   "id": "duff/workspaces-open-on-the-wrong-monitor",
   "title": "Workspaces open on unpredictable monitors",
@@ -63,22 +77,10 @@ The file starts with a header: a JSON object between two `---` lines. Write it c
   "agent_config": false,
   "history": [{"who": "duff", "did": "created", "date": "2026-10-01"}]
 }
----
-
-# Workspaces open on unpredictable monitors
-
-## Problem
-## Why it happens
-## Fix
-## Apply and check
-## Undo
-## Notes
-## History
-
-- Created by [@duff](https://github.com/duff) on 2026-10-01.
 ```
+````
 
-### Header fields
+### Data fields
 
 | Field | Required | What it holds |
 |---|---|---|
@@ -136,7 +138,7 @@ A recipe that installs something doesn't require it. A recipe about tuning Voxty
 - The last entry is always the cookbook's owner.
 - A copy knows how it reached you, not who applied it after you. The library counts that.
 
-The `## History` section repeats the header with links, because GitHub doesn't link `@username` inside repo files:
+The `## History` section repeats the data's history with links, because GitHub doesn't link `@username` inside repo files:
 
 ```markdown
 ## History
@@ -157,6 +159,7 @@ The `## History` section repeats the header with links, because GitHub doesn't l
 - **Undo** (required): how to put things back, including packages, services, and files outside `~/.config`.
 - **Notes** (optional): trade-offs and things that didn't work.
 - **History** (required): as above.
+- **Recipe data** (required, last): the JSON code block, and nothing else.
 
 ### files/
 

@@ -2,7 +2,7 @@
 # it depends on something that comes and goes, like a monitor or a mouse
 # that isn't plugged in right now.
 #
-# Input: the recipe header. --argjson profile: kitchen profile's JSON, with
+# Input: the recipe data. --argjson profile: kitchen profile's JSON, with
 # "commands" and "packages" lists of what this machine has from the recipe's
 # command and package requirements.
 # Output: the verdict on the first line, then one reason per line.

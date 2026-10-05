@@ -1,22 +1,3 @@
----
-{
-  "id": "sam/boot-feels-slow",
-  "title": "Boot feels slow",
-  "summary": "Turn off services Omarchy doesn't need at boot.",
-  "version": 1,
-  "tested_on": {"omarchy": "4.0.4"},
-  "applies_to": "Every machine.",
-  "requires": [],
-  "touches": [],
-  "root": true,
-  "network": false,
-  "installs": [],
-  "runs": [],
-  "agent_config": false,
-  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
-}
----
-
 # Boot feels slow
 
 ## Problem
@@ -42,3 +23,24 @@ Run `sudo systemctl enable systemd-networkd-wait-online`.
 ## History
 
 - Created by [@sam](https://github.com/sam) on 2026-09-20.
+
+## Recipe data
+
+```json
+{
+  "id": "sam/boot-feels-slow",
+  "title": "Boot feels slow",
+  "summary": "Turn off services Omarchy doesn't need at boot.",
+  "version": 1,
+  "tested_on": {"omarchy": "4.0.4"},
+  "applies_to": "Every machine.",
+  "requires": [],
+  "touches": [],
+  "root": true,
+  "network": false,
+  "installs": [],
+  "runs": [],
+  "agent_config": false,
+  "history": [{"who": "sam", "did": "created", "date": "2026-09-20"}]
+}
+```
