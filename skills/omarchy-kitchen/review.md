@@ -116,8 +116,7 @@ The first time (`last_review` is empty), add that this review comes back once a 
 5. Then, if `kitchen pending` listed `later` or `older` recipes, ask whether to keep going: "There are 12 more from earlier you haven't decided on. Keep going, or leave them for another time?" Go through the `later` ones first.
 
 **Each item is written for a person, not a system:**
-- **A heading:** the problem, as they'd say it. The recipe's title usually works.
-- **Where it's from,** in plain words: "From duff's cookbook." No ids, folder names, commits, or links unless they ask.
+- **A heading:** the problem, as they'd say it. The recipe's title usually works. Nothing else on that line: no ids, folder names, commits, links, or whose cookbook it's from. If they ask where it's from, say so.
 - **What happens:** two to four sentences on what happens today on their machine, and what would change.
 - **How it fits them:** "Your Framework has a battery, so this applies." Or how you'd do it differently here: "I'd add this to your existing kanata setup instead of installing keyd."
 - **Anything to know before saying yes,** in plain words: it needs their password, installs something, runs in the background, or changes their agent's settings (quote the line it adds). Mention the safety review only when it found something worth saying.
@@ -126,7 +125,6 @@ The first time (`last_review` is empty), add that this review comes back once a 
 For example:
 
 > **Reboot closes everything without asking**
-> From duff's cookbook.
 >
 > Right now, choosing Reboot from the menu, or pressing Ctrl+Alt+Delete, closes all your windows at once. This adds a quick "Are you sure?" to both.
 >
