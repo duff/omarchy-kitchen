@@ -110,7 +110,8 @@ For someone who already keeps their Omarchy config in a repo:
 2. Add `kitchen/snooze` to `.gitignore`.
 3. Add the session-start check to the repo's agent instructions (`AGENTS.md` or `CLAUDE.md`). Copy the paragraph from `templates/my-omarchy/AGENTS.md`.
 4. Add the omarchy-kitchen block from `templates/my-omarchy/install.sh` to their install script, so other machines get the method too.
-5. If they already publish recipes somewhere, move the old review bookmark into `reviewed_through` and `last_review` in `kitchen/review.json`.
+5. If their repo has no place for files outside `~/.config`, offer the template's `home/` folder, and the `home/` parts of its `install.sh` and `snapshot.sh`. Recipes that change `~/.bashrc` or `~/.claude` need somewhere to go.
+6. If they already publish recipes somewhere, move the old review bookmark into `reviewed_through` and `last_review` in `kitchen/review.json`.
 
 ## Starting a cookbook later
 

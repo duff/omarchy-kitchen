@@ -76,3 +76,30 @@ test_snapshot_keeps_the_gh_login_helper_by_name() {
   assert_has "$(cat "$REPO/config/git/config")" $'^\thelper = !gh auth git-credential$'
   assert_lacks "$(cat "$REPO/config/git/config")" "mise/installs"
 }
+
+test_install_copies_home_files_and_never_deletes_them() {
+  setup_machine
+  mkdir -p "$REPO/home/.claude" "$REPO/home/.ssh"
+  echo "alias ll='ls -l'" >"$REPO/home/.bashrc"
+  echo "- a rule" >"$REPO/home/.claude/CLAUDE.md"
+  echo "Host *" >"$REPO/home/.ssh/config"
+  run_script install.sh >/dev/null
+  assert_eq "alias ll='ls -l'" "$(cat "$HOME_DIR/.bashrc")"
+  assert_eq "- a rule" "$(cat "$HOME_DIR/.claude/CLAUDE.md")"
+  assert_eq "700" "$(stat -c %a "$HOME_DIR/.ssh")"
+
+  rm "$REPO/home/.bashrc"
+  run_script install.sh >/dev/null
+  [[ -f $HOME_DIR/.bashrc ]] || fail "install.sh deleted ~/.bashrc after it left the repo"
+}
+
+test_snapshot_refreshes_home_files_it_keeps() {
+  setup_machine
+  mkdir -p "$REPO/home"
+  echo "old" >"$REPO/home/.bashrc"
+  echo "new" >"$HOME_DIR/.bashrc"
+  echo "not kept" >"$HOME_DIR/.zshrc"
+  run_script snapshot.sh >/dev/null
+  assert_eq "new" "$(cat "$REPO/home/.bashrc")"
+  [[ ! -e $REPO/home/.zshrc ]] || fail "snapshot.sh added a file home/ doesn't keep"
+}

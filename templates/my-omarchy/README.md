@@ -5,6 +5,7 @@
 ```
 config/             # copied into ~/.config/ on every machine
 hosts/<hostname>/   # copied into ~/.config/ on that machine only, after config/
+home/               # copied into ~: home/.bashrc is ~/.bashrc
 kitchen/            # omarchy-kitchen: settings, review state, applied recipes
 install.sh          # repo -> this machine
 snapshot.sh         # this machine -> repo

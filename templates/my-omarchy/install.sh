@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Copy this repo onto this machine: config/ everywhere, then hosts/<hostname>/
-# on this machine only. A file removed from the repo since the last install
-# goes back to Omarchy's stock copy, or is deleted if Omarchy has none.
+# Copy this repo onto this machine: config/ into ~/.config everywhere, then
+# hosts/<hostname>/ into ~/.config on this machine only, then home/ into ~.
+# A file removed from config/ or hosts/ since the last install goes back to
+# Omarchy's stock copy, or is deleted if Omarchy has none. Files removed from
+# home/ are left alone: undoing a recipe removes its files on purpose.
 set -euo pipefail
 
 root=$(cd "$(dirname "$0")" && pwd)
@@ -31,6 +33,18 @@ install_tree() {
 install_tree "$root/config"
 install_tree "$root/hosts/$host"
 sort -u -o "$installed" "$installed"
+
+# home/ mirrors your home folder: home/.bashrc is ~/.bashrc. It holds only
+# the files you chose to keep, never whole folders.
+if [[ -d $root/home ]]; then
+  while IFS= read -r -d '' file; do
+    rel=${file#"$root/home"/}
+    [[ $(basename "$rel") == .gitkeep ]] && continue
+    mkdir -p "$(dirname "$HOME/$rel")"
+    cp -a "$file" "$HOME/$rel"
+  done < <(find "$root/home" -type f -print0)
+  [[ -d $root/home/.ssh ]] && chmod 700 "$HOME/.ssh"
+fi
 
 if [[ -f $manifest ]]; then
   while IFS= read -r rel; do

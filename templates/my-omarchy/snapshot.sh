@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Copy live config back into this repo, then list files that differ from
-# stock Omarchy but aren't in the repo yet. Sort each listed file by
+# Copy live config back into this repo (config/, hosts/<hostname>/, and the
+# files home/ keeps), then list files in ~/.config that differ from stock
+# Omarchy but aren't in the repo yet. Sort each listed file by
 # RULES.md: config/ for every machine, hosts/<hostname>/ for this one, or
 # leave it out.
 set -euo pipefail
@@ -28,6 +29,19 @@ refresh_tree() {
 
 refresh_tree "$root/config"
 refresh_tree "$root/hosts/$host"
+
+# Files home/ already keeps: refresh them from your home folder.
+if [[ -d $root/home ]]; then
+  while IFS= read -r -d '' file; do
+    rel=${file#"$root/home"/}
+    [[ $(basename "$rel") == .gitkeep ]] && continue
+    if [[ -f $HOME/$rel ]]; then
+      cmp -s "$HOME/$rel" "$file" || cp -a "$HOME/$rel" "$file"
+    else
+      echo "Not on this machine: ~/$rel (still in the repo)"
+    fi
+  done < <(find "$root/home" -type f -print0)
+fi
 
 # `gh auth setup-git` writes the full path to this machine's gh, which
 # breaks after a gh update or on another machine. Keep the by-name helper,

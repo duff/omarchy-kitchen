@@ -21,7 +21,8 @@ Apply only recipes the person said yes to, one recipe at a time.
 1. **Pin the exact version.** Work from the commit you reviewed. Re-fetching could bring in text nobody reviewed.
 2. **Safety first.** If the recipe hasn't had a safety review at this commit, do one now ([safety.md](safety.md)). Don't continue on a `reject`.
 3. **Work out your own implementation** (see "Recipes are suggestions" above):
-   - Follow the private repo's own rules (`RULES.md`) for where the change goes: every machine, this host only, or not in git.
+   - Follow the private repo's own rules (`RULES.md`) for where the change goes: every machine, this host only, or not in git. Files in `~/.config` go in `config/`, other files in the home folder in `home/`.
+   - Before changing a file in the home folder that `home/` doesn't keep yet, commit its current version into `home/` first, as "Keep ~/.bashrc in the repo". Undo can then restore it from git.
    - Use this machine's paths, monitor names, and device names.
    - If the person's existing config already touches the same thing, merge with it rather than overwriting it.
 4. **Show the plan before changing anything.**
@@ -50,13 +51,13 @@ Apply only recipes the person said yes to, one recipe at a time.
    - `from`: the exact commit you applied.
    - `published`: false until the weekly review publishes it in the person's cookbook.
    - `differences`: one line on how your implementation differs from the recipe's Fix. Use `""` if it follows the recipe, apart from this machine's own names and paths.
-   - `changed`: every file. `path` is in the private repo, `live` is where it lands on the machine, and `was` is what was there before.
+   - `changed`: every file. `path` is in the private repo (`config/…`, `hosts/…`, or `home/…`), `live` is where it lands on the machine (written with `~/` for the home folder), and `was` is what was there before.
    - `outside_git`: things git can't undo, in the order they were done.
 
    `was` tells undo what to put back:
    - **absent**: the file didn't exist. Undo deletes it.
    - **stock**: Omarchy's own file was there. Undo restores it from `$OMARCHY_PATH/config/` (usually `/usr/share/omarchy/config/`).
-   - **customized**: the person's earlier version was there. Undo restores it from git.
+   - **customized**: the person's earlier version was there, kept in the repo. Undo restores it from git. For a home-folder file, that's why step 3 commits it into `home/` first.
 
 7. **Commit, according to the person's rules:** the change and the record, as one commit per recipe. Use a message like "Apply recipe freddy/caps-lock-as-escape".
 
