@@ -2,6 +2,7 @@
   "owner": "{{username}}",
   "kitchen": "{{version}}",
   "description": "Omarchy customizations from {{name}}.",
-  "machines": [],
-  "allow": ["{{name}}"]
+  "allow": [
+    "{{name}}"
+  ]
 }

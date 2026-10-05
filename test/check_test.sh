@@ -152,6 +152,8 @@ test_cookbook_level_rules() {
   assert_has "$("$KITCHEN" check "$dir")" "recipes/TEMPLATE.md: recipes/ holds only recipe folders"
   echo '{"owner": "duff", "kitchen": "latest", "description": "x"}' >"$dir/cookbook.json"
   assert_has "$("$KITCHEN" check "$dir")" '`kitchen` has to be'
+  echo '{"owner": "duff", "kitchen": "v0.3.0", "description": "x", "machines": ["Dell"]}' >"$dir/cookbook.json"
+  assert_has "$("$KITCHEN" check "$dir")" 'cookbook.json: unknown field `machines`'
 }
 
 test_duplicate_ids() {

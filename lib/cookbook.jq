@@ -11,8 +11,7 @@ else
   (if (.kitchen | type) == "string" and (.kitchen | test("^v[0-9]+\\.[0-9]+\\.[0-9]+$")) then empty
    else "`kitchen` has to be the omarchy-kitchen version it follows, like \"v0.1.0\"" end),
   (if (.description | one_line) then empty else "`description` has to be one line" end),
-  (if has("machines") and (.machines | strings | not) then "`machines` has to be a list of text" else empty end),
   (if has("allow") and (.allow | strings | not) then "`allow` has to be a list of text" else empty end),
-  ((keys - ["owner", "kitchen", "description", "machines", "allow"]) as $unknown
+  ((keys - ["owner", "kitchen", "description", "allow"]) as $unknown
     | if ($unknown | length) > 0 then "unknown field " + ($unknown | map("`\(.)`") | join(", ")) else empty end)
 end

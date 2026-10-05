@@ -7,7 +7,7 @@ omarchy-cookbook/
   README.md            # for people: whose cookbook this is, and every recipe linked by topic
   AGENTS.md            # for agents: this cookbook follows omarchy-kitchen
   CLAUDE.md            # one line, @AGENTS.md
-  cookbook.json        # owner, method version, description, machines
+  cookbook.json        # owner, method version, description
   recipes/
     <slug>/
       RECIPE.md        # the write-up, then the recipe data
@@ -23,21 +23,21 @@ omarchy-cookbook/
 {
   "owner": "duff",
   "kitchen": "v0.1.0",
-  "description": "Customizations for a Dell XPS 16 with Apple Studio Displays, and an old MacBook Air.",
-  "machines": ["Dell XPS 16 with three Apple Studio Displays"],
+  "description": "Duff's Omarchy customizations, one problem per recipe.",
   "allow": ["Duff"]
 }
 ```
 
 - `owner`: the GitHub username.
 - `kitchen`: the omarchy-kitchen version this cookbook follows.
-- `description`: one line, shown in the library.
-- `machines` (optional): what the recipes were tested on, in general terms.
+- `description`: one line, shown in the library. Describe the cookbook as yours, not as your current machines: those change, and most recipes fit any Omarchy machine.
 - `allow` (optional): exact words the privacy scan should accept, like your first name.
 
 ## One recipe, one problem
 
 Name the folder after the symptom someone would search for, not the fix: `workspaces-open-on-the-wrong-monitor`, not `workspace-rules`. Lowercase letters, digits, and hyphens.
+
+Most recipes fit any Omarchy machine. If one needs particular hardware, say so in its title or the first line of its Problem, like "MacBook T2 trackpad moves the cursor while typing". People then see it without reading to the recipe data at the end.
 
 A recipe applied from someone else's cookbook keeps their slug. If your cookbook already has a folder by that name, use `<their-username>--<slug>`.
 
