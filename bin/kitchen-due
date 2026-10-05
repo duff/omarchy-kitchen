@@ -6,7 +6,8 @@
 # ignores, so it stays on the machine where it was set.
 #
 # Prints one of:
-#   due: <why>          then indented lines saying what's waiting
+#   due: <why>          then, for someone with a cookbook, indented lines
+#                       saying what's waiting to share
 #   snoozed: until <when>
 #   not due: next review on <date>
 
@@ -36,7 +37,11 @@ if [[ -n $last ]]; then
     echo "not due: next review on $due_on"
     exit 0
   fi
-  echo "due: the weekly review was due on $due_on (last review $last)"
+  if [[ $today == "$due_on" ]]; then
+    echo "due: the weekly review is due today (last review $last)"
+  else
+    echo "due: the weekly review was due on $due_on (last review $last)"
+  fi
 else
   echo "due: the weekly review has never run"
 fi

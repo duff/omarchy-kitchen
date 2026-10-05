@@ -20,7 +20,8 @@ due() {
 }
 
 test_due_a_week_after_the_last_review() {
-  assert_has "$(due "$(private_repo 2026-10-03)")" "^due: the weekly review was due on 2026-10-10"
+  assert_eq "due: the weekly review is due today (last review 2026-10-03)" "$(due "$(private_repo 2026-10-03)")"
+  assert_has "$(due "$(private_repo 2026-10-01)")" "^due: the weekly review was due on 2026-10-08 \(last review 2026-10-01\)"
   assert_eq "not due: next review on 2026-10-11" "$(due "$(private_repo 2026-10-04)")"
 }
 
