@@ -2,6 +2,19 @@
 
 Each version below says what behaves differently, for someone deciding whether to adopt it.
 
+## v0.5.0
+
+- **Vetting is quick.** Before following a cookbook, the agent vets only the recipes that fit this machine, and fully reviews only those with serious warning signs: reading secrets, sending data off the machine, fetching code, hidden content, or text aimed at an agent. Everything else is reviewed one at a time, just before it's offered. For duff's cookbook on a Framework laptop, that's 4 reviews instead of 36. The report lists rejects and only counts cautions.
+- **`kitchen flags` looks at what runs.** Code warnings come only from the Fix, Apply and check, and Undo sections, the files a recipe ships, and the paths it touches, so a problem description that mentions `curl` isn't flagged. Hidden text and text aimed at an agent are still looked for everywhere, with tighter patterns ("without asking" in a title no longer counts). It now catches `bash -c "$(…)"`, and ignores `hyprctl eval`. `--serious` lists only the serious kinds.
+- **Remembering what was put off or left out.** review.json gains `later` (recipes the person put off, offered first next time) and `left_out` (recipes the agent left out, with the reason). Left-out recipes aren't offered, counted, or named again unless they change.
+- **Setup continues in the new repo.** After making the private repo, setup has the person restart their agent in `~/Work/my-omarchy`, so its commit rules, folder access, and the safety reviewer agent all load. The agent writes out the line to type to finish.
+- **Finding a cookbook by name.** "Follow duff's cookbook" works without a link: the agent tries `duff/omarchy-cookbook`, then the library, then asks, and the account check catches a wrong guess.
+- **A home for files outside `~/.config`.** The private-repo template has a `home/` folder laid out like the home folder: `home/.bashrc` is `~/.bashrc`. `install.sh` copies it into `~` and `snapshot.sh` refreshes it. Recipes that change `~/.bashrc`, `~/.claude`, or `~/.XCompose` now have somewhere to go, follow the person to their other machines, and can be undone from git. `install.sh` never deletes a home-folder file on its own.
+- **A lighter weekly nudge.** When the review is due, the agent asks whether to see what's waiting, instead of a bare "now or when?". Looking fetches the cookbooks and counts what's new; if nothing is waiting, the week is marked done. The session-start check itself stays local and instant.
+- **An OK for surprises.** When an agent's plan for a recipe departs from what it described when offering it, it waits for an OK before changing anything.
+- **`kitchen due` says "due today"** on the day the review is due, and "was due on…" only after.
+- **Cleaner review items.** Each recipe opens with its problem alone, without "From duff's cookbook". The wrap-up sums up recipes that need programs or hardware the person lacks in one line, instead of naming each.
+
 ## v0.4.0
 
 - **The weekly review is a conversation.** Instead of one long list, it goes one item at a time. Each recipe is a problem in plain words, with how it fits this machine and anything to know before saying yes; ids and links appear only when asked for. The person says apply, skip, later, or asks a question, and can stop whenever they like. What they don't reach waits for next time instead of being declined.
