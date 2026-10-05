@@ -1,0 +1,14 @@
+name: Check an Omarchy cookbook
+description: Checks recipes against the omarchy-kitchen format, makes sure their labels are honest, and looks for common private data.
+
+runs:
+  using: composite
+  steps:
+    - name: Check the format and labels
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/bin/kitchen" check "$GITHUB_WORKSPACE"
+    - name: Look for private data
+      shell: bash
+      run: |
+        "$GITHUB_ACTION_PATH/bin/kitchen" scan --cookbook "$GITHUB_WORKSPACE"

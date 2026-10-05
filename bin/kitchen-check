@@ -1,0 +1,134 @@
+#!/bin/bash
+
+# kitchen check [COOKBOOK]: checks a cookbook against the recipe format
+# (skills/omarchy-kitchen/format.md). Prints "path: problem" lines and exits
+# 1, or prints "ok: N recipes".
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+source "$KITCHEN_LIB/labels.sh"
+
+PIPE_TO_SHELL='\b(?:curl|wget)\b[^\n]*\|\s*(?:sudo\s+)?(?:ba|z|da)?sh\b'
+
+# Problems in one recipe folder. owner is the cookbook's GitHub username.
+check_recipe() {
+  local dir=$1 owner=$2 file="$1/RECIPE.md" folder header section rest who link rel target path name
+  folder=$(basename "$dir")
+
+  if ! header=$(kitchen_header "$file"); then
+    echo "has no header (the file must start with a --- line, then a JSON object, then ---)"
+    return
+  fi
+  if ! header=$(jq -c . <<<"$header" 2>/dev/null) || [[ -z $header ]]; then
+    echo "has a header that isn't valid JSON"
+    return
+  fi
+
+  jq -r --arg folder "$folder" --arg owner "$owner" -f "$KITCHEN_LIB/header.jq" <<<"$header"
+
+  local sections
+  sections=$(kitchen_sections "$file")
+  for name in "${REQUIRED_SECTIONS[@]}"; do
+    grep -qxF -- "$name" <<<"$sections" || echo "is missing the ## $name section"
+  done
+
+  # The History section repeats the header with links, because GitHub
+  # doesn't link @username inside repo files.
+  if grep -qxF History <<<"$sections"; then
+    rest=$(kitchen_section "$file" History)
+    while IFS= read -r who; do
+      link="[@$who](https://github.com/$who)"
+      if [[ $rest == *"$link"* ]]; then
+        rest=${rest#*"$link"}
+      else
+        echo "the ## History section has to link each person in order, like $link"
+        break
+      fi
+    done < <(jq -r '(.history // [])[] | objects | .who | strings' <<<"$header")
+  fi
+
+  if LC_ALL=C grep -qP -- "$HIDDEN_BYTES" "$file"; then
+    echo "RECIPE.md has invisible characters that hide text from people"
+  fi
+  if grep -qF -- '<!--' "$file"; then
+    echo "has an HTML comment, which GitHub hides from people but agents still read"
+  fi
+  if kitchen_code "$dir" | grep -qP -- "$PIPE_TO_SHELL"; then
+    echo "pipes a download straight into a shell"
+  fi
+
+  while IFS= read -r rel; do
+    if [[ -L $dir/$rel ]]; then
+      echo "$rel is a symlink; files/ holds real files only"
+    elif ! grep -qF -- "$rel" "$file"; then
+      echo "$rel isn't mentioned in RECIPE.md; every file a recipe ships has to be shown or named"
+    elif LC_ALL=C grep -qP -- "$HIDDEN_BYTES" "$dir/$rel"; then
+      echo "$rel has invisible characters that hide text from people"
+    fi
+  done < <(kitchen_files "$dir")
+
+  while IFS= read -r target; do
+    [[ $target =~ ^([A-Za-z][A-Za-z0-9+.-]*:|#) ]] && continue
+    path=${target%%#*}
+    [[ -n $path && ! -e $dir/$path ]] && echo "links to $target, which doesn't exist"
+  done < <(kitchen_body "$file" | grep -oP '\]\(\K[^)\s]+' || true)
+
+  kitchen_label_mismatches "$dir" "$header"
+}
+
+check_cookbook() {
+  local dir=$1 owner="" settings ids name recipe
+  if [[ -f $dir/cookbook.json ]]; then
+    if settings=$(jq -c . "$dir/cookbook.json" 2>/dev/null); then
+      jq -r -f "$KITCHEN_LIB/cookbook.jq" <<<"$settings" | sed 's/^/cookbook.json: /'
+      owner=$(jq -r '.owner // "" | strings' <<<"$settings")
+    else
+      echo "cookbook.json: isn't valid JSON"
+    fi
+  else
+    echo "cookbook.json: is missing"
+  fi
+
+  local recipes=()
+  if [[ -d $dir/recipes ]]; then
+    for recipe in "$dir"/recipes/*; do
+      [[ -e $recipe ]] || continue
+      name=$(basename "$recipe")
+      if [[ -d $recipe && -f $recipe/RECIPE.md ]]; then
+        recipes+=("$recipe")
+      else
+        echo "recipes/$name: recipes/ holds only recipe folders, each with a RECIPE.md"
+      fi
+    done
+  fi
+
+  for recipe in "${recipes[@]}"; do
+    name=$(basename "$recipe")
+    check_recipe "$recipe" "$owner" | sed "s#^#recipes/$name/RECIPE.md: #"
+  done
+
+  # Two folders with the same id.
+  for recipe in "${recipes[@]}"; do
+    kitchen_header "$recipe/RECIPE.md" 2>/dev/null | jq -r --arg f "$(basename "$recipe")" '[.id, $f] | @tsv' 2>/dev/null || true
+  done | awk -F'\t' '$1 != "" { folders[$1] = folders[$1] (folders[$1] == "" ? "" : ", ") $2; count[$1]++ }
+    END { for (id in count) if (count[id] > 1) print "recipes/: " folders[id] " all have the id " id }'
+
+  if [[ -f $dir/README.md ]]; then
+    for recipe in "${recipes[@]}"; do
+      name=$(basename "$recipe")
+      grep -qF -- "recipes/$name/" "$dir/README.md" || echo "README.md: doesn't link to recipes/$name/RECIPE.md"
+    done
+  else
+    echo "README.md: is missing"
+  fi
+}
+
+dir=${1:-.}
+[[ -d $dir ]] || kitchen_die "no such cookbook folder: $dir"
+problems=$(check_cookbook "$dir")
+if [[ -n $problems ]]; then
+  echo "$problems"
+  exit 1
+fi
+count=$(find "$dir/recipes" -mindepth 2 -maxdepth 2 -name RECIPE.md 2>/dev/null | wc -l)
+echo "ok: $count recipe$([[ $count == 1 ]] || echo s)"

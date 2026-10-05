@@ -1,0 +1,9 @@
+{
+  "review_every_days": 7,
+  "cookbook": "~/Work/omarchy-cookbook",
+  "cache": "~/.cache/omarchy-kitchen",
+  "install_dir": "~/.local/share/omarchy-kitchen",
+  "method_repo": "duff/omarchy-kitchen",
+  "library_repo": "duff/omarchy-library",
+  "topic": "omarchy-cookbook"
+}

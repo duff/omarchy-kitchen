@@ -1,0 +1,48 @@
+# omarchy-kitchen
+
+Share your [Omarchy](https://omarchy.org/) customizations as recipes, and pick up other people's. Your agent does the legwork; you decide every step.
+
+## How it works
+
+- **Your private repo** (`my-omarchy`) holds your real config, for every machine you own.
+- **Your cookbook** (`omarchy-cookbook`) is optional and public. It holds recipes: one problem each, with what stock Omarchy does, the fix, how to check it, and how to undo it.
+- **You follow** cookbooks from people you trust.
+- **Once a week**, opening your agent in `my-omarchy` offers a review:
+  - changes of yours worth publishing
+  - new recipes from cookbooks you follow, if they fit your machine and you don't already have something better
+  - new versions of this method
+
+  You say yes or no to each. If it's not a good time, tell it when.
+- **Recipes from others** get a safety review before you see them.
+- **Anything you apply can be undone.**
+- **The [library](https://github.com/duff/omarchy-library)** lists every public cookbook.
+
+## Get started
+
+In a terminal on your Omarchy machine, ask your agent:
+
+> Set me up with Omarchy cookbooks from github.com/duff/omarchy-kitchen.
+
+Add "and follow \<username\>'s cookbook" to start with someone's recipes. Your agent asks before creating anything: a private GitHub repo for your config, and a public cookbook if you want one.
+
+## What's here
+
+| Path | What it is |
+|---|---|
+| `skills/omarchy-kitchen/` | The instructions agents follow. [format.md](skills/omarchy-kitchen/format.md) is the recipe format. |
+| `bin/kitchen` | Checks recipes, scans for private data, checks if a recipe fits a machine, describes your setup, and tracks the review schedule. |
+| `templates/` | The starting private repo and cookbook. |
+| `action.yml` | The check every cookbook runs on push. |
+| `test/` | Tests for `bin/kitchen` and the templates, plus agent scenarios in `test/evals/`. |
+
+## For agents
+
+If someone asked you to set them up:
+
+1. Clone this repo into `~/.local/share/omarchy-kitchen`.
+2. Check out the newest tag, and run `./install`.
+3. Follow `skills/omarchy-kitchen/setup.md`.
+
+## Changes
+
+New versions are tags, described in [CHANGELOG.md](CHANGELOG.md). Everyone's weekly review explains a new version and asks before adopting it. Pull requests are welcome.

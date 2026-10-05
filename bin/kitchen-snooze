@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# kitchen snooze WHEN [--repo DIR]: puts the weekly review off until WHEN,
+# written as YYYY-MM-DD (the start of that day) or YYYY-MM-DD HH:MM, local
+# time. kitchen snooze --clear removes the snooze.
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+kitchen_find_repo "$@"
+file="$KITCHEN_REPO/kitchen/snooze"
+
+if [[ ${ARGS[0]:-} == --clear ]]; then
+  rm -f "$file"
+  echo "No snooze."
+  exit 0
+fi
+
+when="${ARGS[*]}"
+if [[ ! $when =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}( [0-9]{1,2}:[0-9]{2})?$ ]] || ! date -d "$when" >/dev/null 2>&1; then
+  kitchen_die "snooze: use YYYY-MM-DD or YYYY-MM-DD HH:MM"
+fi
+echo "$when" >"$file"
+echo "Snoozed until $when."

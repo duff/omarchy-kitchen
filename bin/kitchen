@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# kitchen <command> [arguments]: runs bin/kitchen-<command>.
+
+set -o pipefail
+
+KITCHEN_BIN=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+
+usage() {
+  cat <<'EOF'
+Usage: kitchen <command> [arguments]
+
+  check [COOKBOOK]               Check a cookbook against the recipe format
+  scan [--local] [--words FILE] [--cookbook DIR] [PATH...]
+                                 Look for private data in files about to be published
+  flags RECIPE_DIR               List warning signs for a safety review
+  profile                        Print this machine's facts that recipes can require
+  match RECIPE_DIR [--profile FILE]
+                                 Say whether a recipe fits this machine: yes, no, or maybe
+  status [--repo DIR]            Describe this person's setup in plain words
+  due [--repo DIR]               Say whether the weekly review is due
+  snooze WHEN [--repo DIR]       Put the review off until WHEN (YYYY-MM-DD [HH:MM])
+  snooze --clear [--repo DIR]    Remove a snooze
+  version                        Print the installed omarchy-kitchen version
+EOF
+}
+
+command=${1:-}
+case $command in
+  "" | -h | --help | help)
+    usage
+    ;;
+  *)
+    if [[ $command =~ ^[a-z]+$ && -x $KITCHEN_BIN/kitchen-$command ]]; then
+      shift
+      exec "$KITCHEN_BIN/kitchen-$command" "$@"
+    fi
+    echo "kitchen: unknown command $command" >&2
+    echo >&2
+    usage >&2
+    exit 2
+    ;;
+esac

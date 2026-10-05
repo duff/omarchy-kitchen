@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# kitchen status [--repo DIR]: one person's setup, in plain words. It's what
+# the agent reads out when someone asks how this works for them.
+# KITCHEN_OFFLINE=1 skips asking GitHub whether the cookbook is listed.
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+kitchen_find_repo "$@"
+repo=$KITCHEN_REPO
+settings=$(kitchen_settings "$repo")
+
+method=$(jq -r '.method // "version not set"' <<<"$settings")
+installed=$(git -C "$KITCHEN_ROOT" describe --tags --always 2>/dev/null || true)
+note=""
+[[ -n $installed && $installed != "$method" ]] && note=" (installed copy is $installed)"
+echo "Method: omarchy-kitchen $method$note"
+echo "Private repo: $(kitchen_tilde "$repo")"
+
+cookbook=$(kitchen_expand "$(jq -r '.cookbook' <<<"$settings")")
+if [[ -f $cookbook/cookbook.json ]]; then
+  owner=$(jq -r '.owner // "?"' "$cookbook/cookbook.json")
+  name="$owner/$(basename "$cookbook")"
+  count=$(find "$cookbook/recipes" -mindepth 2 -maxdepth 2 -name RECIPE.md 2>/dev/null | wc -l)
+  listed=""
+  if [[ -z ${KITCHEN_OFFLINE:-} ]] &&
+    topics=$(gh repo view "$name" --json repositoryTopics --jq '[.repositoryTopics[].name] | join(" ")' 2>/dev/null); then
+    if [[ " $topics " == *" $(jq -r '.topic' <<<"$settings") "* ]]; then
+      listed=", listed in the library"
+    else
+      listed=", not listed in the library"
+    fi
+  fi
+  echo "Cookbook: $name at $(kitchen_tilde "$cookbook"), $count recipe$([[ $count == 1 ]] || echo s)$listed"
+else
+  echo "Cookbook: none (nothing gets published)"
+fi
+
+following=$(jq -r '(.following // []) | if length == 0 then "nobody yet" else join(", ") end' <<<"$settings")
+echo "Following: $following"
+
+due=$("$KITCHEN_ROOT/bin/kitchen-due" --repo "$repo" | head -n1)
+case $due in
+  due:*) echo "Weekly review: due now" ;;
+  "snoozed: "*) echo "Weekly review: snoozed ${due#snoozed: }" ;;
+  *) echo "Weekly review: ${due#not due: }" ;;
+esac
+
+applied=0
+queued=0
+for record in "$repo"/kitchen/applied/*.json; do
+  [[ -f $record ]] || continue
+  applied=$((applied + 1))
+  [[ $(jq -r '.published' "$record") == false ]] && queued=$((queued + 1))
+done
+echo "Applied from others: $applied$( ((queued)) && echo " ($queued waiting to be published)")"

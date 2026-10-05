@@ -1,0 +1,120 @@
+#!/bin/bash
+
+# kitchen scan [--local] [--words FILE] [--cookbook DIR] [PATH...]: looks for
+# private data in files about to be published. It's a backstop behind the
+# agent's own privacy review, not a replacement for it.
+#
+#   --local       also look for this machine's hostname, saved Wi-Fi networks,
+#                 display serials, Tailscale names, and your git name and email
+#   --words FILE  also look for the words in FILE, one per line (# comments)
+#   --cookbook D  scan cookbook D, accepting the words in its cookbook.json
+#                 "allow" list and its owner's username
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+
+declare -A PATTERNS=(
+  ["an email address"]='[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}'
+  ["a home folder path (write ~ instead)"]='/home/[A-Za-z_][A-Za-z0-9_.-]*'
+  ["an IP address"]='\b(?:\d{1,3}\.){3}\d{1,3}\b'
+  ["a MAC address"]='\b[0-9A-Fa-f]{2}(?::[0-9A-Fa-f]{2}){5}\b'
+  ["a Tailscale name"]='\b[\w-]+(?:\.[\w-]+)*\.ts\.net\b'
+  ["a display serial number"]='\b0x[0-9A-F]{8}\b'
+  ["a token or private key"]='\bgh[pousr]_[A-Za-z0-9]{30,}|\bgithub_pat_\w{20,}|\bsk-ant-[\w-]{20,}|\bsk-[A-Za-z0-9]{20,}|\bxox[abpr]-[\w-]{10,}|\bAKIA[0-9A-Z]{16}\b|-----BEGIN [A-Z ]*PRIVATE KEY-----|\beyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}'
+)
+
+# Matches that look private but aren't: documentation addresses,
+# placeholders, and loopback.
+ALLOWED='@example\.(com|org|net)$|^git@github\.com$|noreply\.github\.com$|^/home/([Uu][Ss][Ee][Rr]|[Yy][Oo][Uu]|[Mm][Ee])$|^127\.|^0\.0\.0\.0$|^255\.|^(192\.0\.2|198\.51\.100|203\.0\.113)\.'
+
+TEXT_NAMES='\.(md|json|jsonc|ya?ml|toml|lua|conf|ini|sh|rb|py|txt|service|timer|rules|hwdb|desktop|css|qml|js|mjs)$|^[^.]+$'
+
+# Private words this machine knows about. Read at scan time, never written.
+local_terms() {
+  uname -n
+  git config --global user.email 2>/dev/null
+  git config --global user.name 2>/dev/null | tr ' ' '\n'
+  nmcli -t -f NAME,TYPE connection show 2>/dev/null |
+    sed 's/\\:/\x01/g' | awk -F: '$2 ~ /wireless/ { print $1 }' | tr '\001' ':'
+  hyprctl monitors all -j 2>/dev/null | jq -r '.[].serial | strings | select(. != "" and . != "0")' 2>/dev/null
+  tailscale status --json 2>/dev/null |
+    jq -r '([.Self] + ((.Peer // {}) | [.[]]))[] | select(. != null) | .HostName, (.DNSName | rtrimstr("."))' 2>/dev/null
+  tailscale status --json 2>/dev/null | jq -r '.MagicDNSSuffix // empty' 2>/dev/null
+}
+
+terms=()
+allow=()
+paths=()
+while (($#)); do
+  case $1 in
+    --local)
+      while IFS= read -r term; do terms+=("$term"); done < <(local_terms)
+      shift
+      ;;
+    --words)
+      [[ -f ${2:-} ]] || kitchen_die "no such words file: ${2:-}"
+      while IFS= read -r term; do terms+=("$term"); done < <(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' "$2" | grep -vE '^(#|$)' || true)
+      shift 2
+      ;;
+    --cookbook)
+      [[ -f ${2:-}/cookbook.json ]] || kitchen_die "${2:-} has no cookbook.json"
+      while IFS= read -r word; do allow+=("$word"); done < <(jq -r '(.allow // [])[], (.owner // empty)' "$2/cookbook.json")
+      paths+=("$2")
+      shift 2
+      ;;
+    *)
+      paths+=("$1")
+      shift
+      ;;
+  esac
+done
+((${#paths[@]})) || paths=(.)
+
+is_allowed() {
+  local found=$1 word
+  [[ $found =~ $ALLOWED ]] && return 0
+  for word in "${allow[@]}"; do
+    [[ ${found,,} == "${word,,}" ]] && return 0
+  done
+  return 1
+}
+
+files=()
+for path in "${paths[@]}"; do
+  if [[ -d $path ]]; then
+    while IFS= read -r -d '' file; do
+      name=$(basename "$file")
+      [[ $name =~ $TEXT_NAMES ]] && kitchen_is_text "$file" && files+=("$file")
+    done < <(find "$path" -name .git -prune -o -type f -print0 | sort -z)
+  else
+    files+=("$path")
+  fi
+done
+((${#files[@]})) || { echo "ok: nothing private found"; exit 0; }
+
+findings=()
+for kind in "${!PATTERNS[@]}"; do
+  while IFS= read -r hit; do
+    [[ -n $hit ]] || continue
+    found=${hit#*:*:}
+    is_allowed "$found" && continue
+    findings+=("${hit%"$found"}$kind: $found")
+  done < <(grep -HnoP -- "${PATTERNS[$kind]}" "${files[@]}" 2>/dev/null || true)
+done
+
+for term in "${terms[@]}"; do
+  term=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"$term")
+  ((${#term} >= 3)) || continue
+  [[ ${term,,} =~ ^localhost(\.localdomain)?$ ]] && continue
+  is_allowed "$term" && continue
+  while IFS= read -r hit; do
+    [[ -n $hit ]] || continue
+    findings+=("$(cut -d: -f1,2 <<<"$hit"): a private word from this machine or your list: $term")
+  done < <(grep -HniwF -- "$term" "${files[@]}" 2>/dev/null || true)
+done
+
+if ((${#findings[@]})); then
+  printf '%s\n' "${findings[@]}" | sort -t: -k1,1 -k2,2n -u
+  exit 1
+fi
+echo "ok: nothing private found"

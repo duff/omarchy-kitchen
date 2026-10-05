@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Runs every test: test/run [name filter]
+#
+# Each test/*_test.sh file defines functions named test_*. Every test runs
+# in its own subshell, and an assertion that fails exits that subshell.
+
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." || exit 1
+source test/helper.sh
+for file in test/*_test.sh; do
+  source "$file"
+done
+
+count=0
+failures=0
+for name in $(declare -F | awk '{ print $3 }' | grep '^test_' | sort); do
+  [[ -n ${1:-} && $name != *"$1"* ]] && continue
+  count=$((count + 1))
+  output=$( (
+    TEST_TMP=$(mktemp -d)
+    trap 'rm -rf "$TEST_TMP"' EXIT
+    "$name"
+  ) 2>&1)
+  if (($?)); then
+    failures=$((failures + 1))
+    printf '\nFAIL %s\n%s\n' "$name" "$(sed 's/^/  /' <<<"$output")"
+  else
+    printf .
+  fi
+done
+
+printf '\n%d tests, %d failures\n' "$count" "$failures"
+((failures == 0))

@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# kitchen flags RECIPE_DIR: lists warning signs a safety reviewer should
+# look at closely. Unlike check, these aren't errors: a good recipe can use
+# sudo. They point the reviewer at the lines that matter. No flags doesn't
+# mean safe.
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+source "$KITCHEN_LIB/labels.sh"
+
+dir=${1:-}
+[[ -f $dir/RECIPE.md ]] || kitchen_die "kitchen flags: which recipe folder?"
+
+KINDS=(
+  "reads secrets or private data"
+  "sends data off the machine"
+  "downloads or runs code from the internet"
+  "hides or decodes content"
+  "runs as root"
+  "starts something that runs on its own"
+  "changes agent instructions or settings"
+  "speaks to an AI agent"
+)
+
+declare -A RULES=(
+  ["reads secrets or private data"]='~/\.ssh\b|\.ssh/|\.gnupg\b|(?i:\bkeyrings?\b)|\.password-store\b|\.netrc\b|\.aws/credentials|\.docker/config\.json|\.kube/config|/etc/(?:shadow|sudoers)\b|(?i:(?:google-chrome|chromium|BraveSoftware|\.mozilla|firefox)\b.*(?:Cookies|Login Data|logins\.json|key4\.db))|\bprintenv\b|/proc/[^/\s]+/environ|\$\{?[A-Z_]*(?:TOKEN|SECRET|PASSWORD|API_KEY)\b|\b(?:secret-tool|op\s+read|op\s+item\s+get)\b'
+  ["sends data off the machine"]='\bcurl\b[^\n]*(?:\s-d\b|--data|\s-F\b|--form|--upload-file|\s-T\b)|\bwget\b[^\n]*--post|\b(?:nc|ncat|socat)\b|/dev/(?:tcp|udp)/|\bscp\b|\brsync\b[^\n]*\S+:'
+  ["downloads or runs code from the internet"]='\b(?:curl|wget)\b|\bgit\s+clone\b|\bomarchy\s+(?:plugin\s+add|theme\s+install)\b|\b(?:pip3?|pipx|cargo|go)\s+install\b|\bnpm\s+(?:i|install)\b|\b(?:yay|paru)\s+-S'
+  ["hides or decodes content"]='\bbase64\s+(?:-d|--decode)\b|\bxxd\s+-r\b|\bopenssl\s+enc\b|\beval\b|[A-Za-z0-9+/=]{120,}|<!--'
+  ["runs as root"]="${LABEL_COMMANDS[root]}"
+  ["starts something that runs on its own"]="${LABEL_COMMANDS[runs]}|${LABEL_PATHS[runs]}"
+  ["changes agent instructions or settings"]="${LABEL_COMMANDS[agent_config]}|${LABEL_PATHS[agent_config]}|(?i:\bpermissions\b.*\ballow\b)|--dangerously|\bbypassPermissions\b"
+  ["speaks to an AI agent"]='(?i:ignore (?:all |any )?(?:previous|prior|earlier|above) (?:instructions|rules))|(?i:do not (?:tell|show|mention|inform)[^.\n]{0,40}\b(?:user|human|person|owner)\b)|(?i:\b(?:you are|as) an? (?:AI|agent|assistant|language model)\b)|(?i:\bsystem prompt\b)|(?i:\bnew instructions\b)|(?i:\bwithout asking\b)'
+)
+
+texts=("RECIPE.md")
+while IFS= read -r rel; do
+  kitchen_is_text "$dir/$rel" && texts+=("$rel")
+done < <(kitchen_files "$dir")
+
+found=0
+for kind in "${KINDS[@]}"; do
+  while IFS= read -r hit; do
+    [[ -n $hit ]] || continue
+    file=${hit%%:*}
+    rest=${hit#*:}
+    line=${rest%%:*}
+    text=$(sed -E 's/^[[:space:]]+//; s/[[:space:]]+$//' <<<"${rest#*:}")
+    echo "$kind: $file:$line: ${text:0:100}"
+    found=1
+  done < <(cd "$dir" && grep -HnP -- "${RULES[$kind]}" "${texts[@]}" 2>/dev/null || true)
+  # Invisible characters, matched as bytes.
+  if [[ $kind == "hides or decodes content" ]]; then
+    while IFS= read -r hit; do
+      [[ -n $hit ]] || continue
+      echo "$kind: ${hit%%:*}:$(cut -d: -f2 <<<"$hit"): invisible characters"
+      found=1
+    done < <(cd "$dir" && LC_ALL=C grep -HnP -- "$HIDDEN_BYTES" "${texts[@]}" 2>/dev/null || true)
+  fi
+done
+
+((found)) || echo "no warning signs"

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# kitchen match RECIPE_DIR [--profile FILE]: says whether a recipe fits this
+# machine (yes, no, or maybe), with the reasons indented below.
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+
+dir=${1:-}
+[[ -f $dir/RECIPE.md ]] || kitchen_die "kitchen match: which recipe folder?"
+shift
+
+profile=""
+if [[ ${1:-} == --profile ]]; then
+  profile=$(cat "${2:?}")
+else
+  profile=$("$KITCHEN_ROOT/bin/kitchen-profile")
+fi
+
+header=$(kitchen_header "$dir/RECIPE.md" | jq -c .) || kitchen_die "$dir/RECIPE.md has no valid header"
+
+# What this machine has, out of the commands and packages the recipe needs.
+# A profile from --profile can say so itself (tests do).
+if ! jq -e 'has("commands")' <<<"$profile" >/dev/null; then
+  have=()
+  while IFS= read -r name; do
+    command -v -- "$name" >/dev/null 2>&1 && have+=("$name")
+  done < <(jq -r '(.requires // [])[] | .command // empty' <<<"$header")
+  profile=$(jq -c '.commands = $ARGS.positional' --args "${have[@]}" <<<"$profile")
+fi
+if ! jq -e 'has("packages")' <<<"$profile" >/dev/null; then
+  have=()
+  while IFS= read -r name; do
+    pacman -Q -- "$name" >/dev/null 2>&1 && have+=("$name")
+  done < <(jq -r '(.requires // [])[] | .package // empty' <<<"$header")
+  profile=$(jq -c '.packages = $ARGS.positional' --args "${have[@]}" <<<"$profile")
+fi
+
+jq -r --argjson profile "$profile" -f "$KITCHEN_LIB/match.jq" <<<"$header" | sed '2,$s/^/  /'

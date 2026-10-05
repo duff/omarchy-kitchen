@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# kitchen profile: prints this machine's facts that recipes can require, as
+# JSON. It isn't published: build it when needed and throw it away.
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+
+dmi() {
+  cat "/sys/class/dmi/id/$1" 2>/dev/null || true
+}
+
+# DMI chassis types for laptops, notebooks, sub-notebooks, convertibles, and
+# detachables, or a system battery.
+laptop=false
+case $(dmi chassis_type) in
+  8 | 9 | 10 | 14 | 31 | 32) laptop=true ;;
+esac
+if [[ $laptop == false ]]; then
+  for supply in /sys/class/power_supply/*; do
+    [[ $(cat "$supply/type" 2>/dev/null) == Battery && $(cat "$supply/scope" 2>/dev/null || echo System) != Device ]] && laptop=true
+  done
+fi
+
+monitors=$(hyprctl monitors all -j 2>/dev/null | jq -c '[.[] | [.make, .model] | map(select(. != null)) | join(" ")]' 2>/dev/null || echo '[]')
+devices=$(hyprctl devices -j 2>/dev/null | jq -c '[(.keyboards // [])[], (.mice // [])[] | .name] | unique' 2>/dev/null || echo '[]')
+omarchy=$(omarchy version 2>/dev/null | sed -E 's/-[0-9]+$//' || true)
+hyprland=$(hyprctl version -j 2>/dev/null | jq -r '.version // empty' 2>/dev/null || true)
+
+jq -n \
+  --arg vendor "$(dmi sys_vendor)" --arg model "$(dmi product_name)" --arg family "$(dmi product_family)" \
+  --argjson laptop "$laptop" --argjson monitors "${monitors:-[]}" --argjson devices "${devices:-[]}" \
+  --arg omarchy "$omarchy" --arg hyprland "$hyprland" \
+  '{vendor: $vendor, model: $model, family: $family, laptop: $laptop, monitors: $monitors,
+    devices: $devices, omarchy: $omarchy, hyprland: $hyprland}'

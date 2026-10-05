@@ -1,0 +1,6 @@
+# Words that must never appear in your public cookbook, one per line:
+# your surname, family members' names, private project names, your street.
+#
+# The privacy scan already finds this machine's hostname, saved Wi-Fi
+# networks, display serial numbers, Tailscale names, and your git name and
+# email on its own.

@@ -1,0 +1,6 @@
+[Unit]
+Description=Back up SSH keys
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/key-backup

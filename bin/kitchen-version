@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# kitchen version: the installed omarchy-kitchen version.
+
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+git -C "$KITCHEN_ROOT" describe --tags --always 2>/dev/null || echo unknown
