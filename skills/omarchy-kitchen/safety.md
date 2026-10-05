@@ -4,7 +4,9 @@ Every recipe from another person's cookbook gets this review before it's offered
 
 ## Who does the review
 
-**A separate reviewer, if your agent can start one.** Start a fresh subagent with read-only tools: it can read files, but has no shell and can't write. Give it only:
+**In Claude Code, use the `kitchen-safety-reviewer` agent,** which `install` sets up. It reads files and nothing else, and it runs at `xhigh` effort whatever the session is set to. Give it the recipe folder's path and the output of `kitchen flags`.
+
+**With other agents, use a separate reviewer if your agent can start one.** Start a fresh subagent with read-only tools: it can read files, but has no shell and can't write. Give it only:
 
 - the recipe folder's path
 - the output of `kitchen flags <recipe-folder>`

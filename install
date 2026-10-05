@@ -10,4 +10,9 @@ for skills_dir in ~/.agents/skills ~/.claude/skills ~/.codex/skills ~/.pi/agent/
   ln -sfn "$root/skills/omarchy-kitchen" "$skills_dir/omarchy-kitchen"
 done
 
+# Claude Code also gets a read-only safety reviewer that runs at high effort
+# whatever the session is set to. Other agents review recipes themselves.
+mkdir -p ~/.claude/agents
+ln -sfn "$root/agents/kitchen-safety-reviewer.md" ~/.claude/agents/kitchen-safety-reviewer.md
+
 echo "omarchy-kitchen $(git -C "$root" describe --tags --always 2>/dev/null || echo '(no version)') is installed."

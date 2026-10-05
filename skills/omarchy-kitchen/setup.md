@@ -65,10 +65,10 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
    - **If no:** leave out the cookbook, and don't ask about the library. The weekly review then skips publishing.
 
 5. **Let the agent reach the other folders.** The agent works from `~/Work/my-omarchy`, but it also reads and writes `~/Work/omarchy-cookbook` and `~/.cache/omarchy-kitchen`, and pushes the cookbook.
-   - **Claude Code:** the template's `.claude/settings.json` lists both folders under `permissions.additionalDirectories`. Claude Code uses it after the person trusts the folder the first time they start Claude there.
+   - **Claude Code:** the template's `.claude/settings.json` lists these folders, plus the method's own folder, under `permissions.additionalDirectories`. The safety reviewer reads from all three. Claude Code uses it after the person trusts the folder the first time they start Claude there.
    - **Other agents:** find their equivalent setting (writable folders, and network for git push), and set it with the person's OK. If there's none, tell the person they'll see permission prompts for the cookbook.
 
-6. **Follow cookbooks.** Add the ones the person named to `following` in `kitchen/settings.json`, as `<owner>/<repo>`, normally `<owner>/omarchy-cookbook`. Mention that they can browse the library for more any time.
+6. **Follow cookbooks.** For each one the person named, follow "Following a cookbook" below: confirm the account, check the cookbook, and add it to `following`. Then commit and push `kitchen/settings.json`.
 
 7. **Offer a first look at those recipes now,** if they'd like. It's the weekly review's one-at-a-time walk-through ([review.md](review.md)), and they can stop whenever they like. Whatever they don't get to waits for next time.
 
@@ -76,6 +76,14 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
    - Once a week, opening their agent in `~/Work/my-omarchy` offers a review. They can say when, if not now.
    - "Apply", "undo", or "publish" a recipe any time.
    - Everything waits for their yes.
+   - The weekly review involves judgment calls, so it works best at high effort or above. In Claude Code, `/effort` shows and changes it.
+
+9. **Offer a note to send back,** if they made a public cookbook and someone invited them, meaning they followed that person's cookbook. Give them a short message, ready to text or email, filled in with their own username:
+
+   > I set up my Omarchy cookbook: https://github.com/sam-example/omarchy-cookbook
+   > If you'd like to follow it back, tell your agent: *Follow sam-example's cookbook at github.com/sam-example/omarchy-cookbook.*
+
+   Sending it is up to them.
 
 ## A second machine
 
@@ -98,11 +106,35 @@ For someone who already keeps their Omarchy config in a repo:
 4. Add the omarchy-kitchen block from `templates/my-omarchy/install.sh` to their install script, so other machines get the method too.
 5. If they already publish recipes somewhere, move the old review bookmark into `reviewed_through` and `last_review` in `kitchen/review.json`.
 
-## Following and unfollowing
+## Starting a cookbook later
 
-- Following or unfollowing is an edit to `following` in `kitchen/settings.json`.
-- A newly followed cookbook's recipes all come up in the next review, or right away if the person asks.
-- Unfollowing leaves applied recipes alone. They stay until undone.
+Someone who said no to a cookbook at setup can start one any time, often when the weekly review first finds something worth publishing. Follow step 4 above. If they follow anyone's cookbook, offer the note from step 9 as well.
+
+## Following a cookbook
+
+The usual request is a line someone sent them, like "Follow sam-example's cookbook at github.com/sam-example/omarchy-cookbook". Vet the cookbook before adding it to `following`. The link probably came by text or email, and following means its recipes will be offered every week.
+
+1. **Find the repo:** `gh repo view <owner>/<repo> --json isPrivate,description,createdAt,pushedAt`. It has to be public.
+2. **Confirm the person:** `gh api users/<owner> --jq '{login, name, created_at, public_repos}'`. Show the name and the account's age, and ask whether that's the person they know. Point out anything odd: an account created days ago, a name that doesn't match, or a username one letter off from someone they know.
+3. **Fetch it** into the cache, as in [review.md](review.md) part 3, and note the commit.
+4. **Check the format:** `kitchen check <dir>`. A cookbook that fails isn't in the library either. Say what's wrong, and recommend waiting until the owner fixes it.
+5. **Look for trouble.** Run `kitchen flags` on every recipe.
+   - **Up to 15 recipes:** give every one a safety review ([safety.md](safety.md)).
+   - **Larger cookbooks:** review each recipe that has a flag. The rest get their safety review one at a time, just before the weekly review offers them.
+   - Save every verdict (see "Verdicts" in [review.md](review.md)).
+6. **Report and recommend,** in a few lines:
+   - how many recipes there are, and how many were reviewed, with the count of each verdict
+   - every `caution` and `reject`, with the line it's about
+   - a recommendation: follow, or don't. One `reject` is enough to recommend not following: a cookbook that ships a malicious recipe isn't one to trust, even if the rest look fine.
+7. **On a yes,** add `<owner>/<repo>` to `following` in `kitchen/settings.json`, then commit and push; the yes covers it.
+   - Don't record a commit for it in `kitchen/review.json`. The next weekly review then offers its recipes that fit, reusing the saved verdicts.
+   - Offer to go through its recipes now, one at a time, as in [review.md](review.md), rather than waiting for the weekly review.
+
+Following isn't blanket trust. Every new or changed recipe from a followed cookbook still gets its own safety review in each weekly review.
+
+## Unfollowing
+
+Remove it from `following` in `kitchen/settings.json`. Recipes already applied from it stay until undone.
 
 ## Joining or leaving the library
 

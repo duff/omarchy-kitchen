@@ -2,7 +2,8 @@
   "permissions": {
     "additionalDirectories": [
       "{{home}}/Work/omarchy-cookbook",
-      "{{home}}/.cache/omarchy-kitchen"
+      "{{home}}/.cache/omarchy-kitchen",
+      "{{home}}/.local/share/omarchy-kitchen"
     ]
   }
 }

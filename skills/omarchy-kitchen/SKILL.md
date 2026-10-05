@@ -28,7 +28,7 @@ Read the guide for the task before starting:
 | Turning a private change into a public recipe | [publish.md](publish.md) |
 | Applying a recipe, or undoing one | [apply.md](apply.md) |
 | Reviewing a recipe for safety before applying it | [safety.md](safety.md) |
-| Setting up a new person, following cookbooks, joining the library | [setup.md](setup.md) |
+| Setting up a new person, following or vetting a cookbook, joining the library | [setup.md](setup.md) |
 | The recipe and cookbook format | [format.md](format.md) |
 
 ## Where things are

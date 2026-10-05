@@ -6,7 +6,7 @@ Share your [Omarchy](https://omarchy.org/) customizations as recipes, and pick u
 
 - **Your private repo** (`my-omarchy`) holds your real config, for every machine you own.
 - **Your cookbook** (`omarchy-cookbook`) is optional and public. It holds recipes: one problem each, with what stock Omarchy does, the fix, how to check it, and how to undo it.
-- **You follow** cookbooks from people you trust.
+- **You follow** cookbooks from people you trust. Your agent checks the account and safety-reviews every recipe before you follow one. If you make a cookbook, it gives you a note to send the person who invited you, so they can follow you back.
 - **Once a week**, opening your agent in `my-omarchy` offers a review:
   - changes of yours worth publishing
   - new recipes from cookbooks you follow, if they fit your machine and you don't already have something better
@@ -17,6 +17,8 @@ Share your [Omarchy](https://omarchy.org/) customizations as recipes, and pick u
 - **Recipes from others** get a safety review before you see them.
 - **Anything you apply can be undone.**
 - **The [library](https://github.com/duff/omarchy-library)** lists every public cookbook.
+
+Reviews involve judgment calls, so they work best at high effort or above. In Claude Code, `/effort` shows and changes it. The safety reviews always run at `xhigh`.
 
 ## Get started
 
@@ -31,6 +33,7 @@ Add "and follow \<username\>'s cookbook" to start with someone's recipes. Your a
 | Path | What it is |
 |---|---|
 | `skills/omarchy-kitchen/` | The instructions agents follow. [format.md](skills/omarchy-kitchen/format.md) is the recipe format. |
+| `agents/` | The read-only safety reviewer for Claude Code, at `xhigh` effort. |
 | `bin/kitchen` | Checks recipes, scans for private data, checks if a recipe fits a machine, describes your setup, and tracks the review schedule. |
 | `templates/` | The starting private repo and cookbook. |
 | `action.yml` | The check every cookbook runs on push. |
