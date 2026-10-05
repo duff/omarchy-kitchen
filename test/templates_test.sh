@@ -65,3 +65,14 @@ test_snapshot_refreshes_tracked_files_and_lists_new_differences() {
   assert_has "$output" "added    ~/.config/hypr/extra.lua"
   assert_lacks "$output" "current|Cookies"
 }
+
+test_snapshot_keeps_the_gh_login_helper_by_name() {
+  setup_machine
+  mkdir -p "$REPO/config/git" "$HOME_DIR/.config/git"
+  printf '[credential "https://github.com"]\n\thelper =\n\thelper = !/home/sam/.local/share/mise/installs/gh/2.83.1/bin/gh auth git-credential\n' \
+    >"$HOME_DIR/.config/git/config"
+  echo old >"$REPO/config/git/config"
+  run_script snapshot.sh >/dev/null
+  assert_has "$(cat "$REPO/config/git/config")" $'^\thelper = !gh auth git-credential$'
+  assert_lacks "$(cat "$REPO/config/git/config")" "mise/installs"
+}

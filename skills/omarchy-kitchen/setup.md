@@ -4,11 +4,25 @@
 
 The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omarchy-kitchen", sometimes followed by "and follow <username>'s cookbook". Ask before each step that creates something. Keep the explanations short: the person may be new to all of this.
 
-1. **Check the basics:**
+1. **Check the basics,** and sort out anything missing yourself, so the person never needs to prepare anything before asking:
    - `omarchy version`, to confirm this is Omarchy.
    - `git --version`.
-   - `gh auth status`. If GitHub isn't logged in, ask the person to run `gh auth login` in a terminal, and wait.
-   - `gh auth setup-git`, so `git push` over HTTPS uses the same login.
+   - `gh --version`. Omarchy installs the GitHub CLI during its own setup. If it's missing, install it with the person's OK: `omarchy mise install gh`.
+   - `gh auth status`. If they aren't signed in to GitHub:
+     - Ask whether they have a GitHub account. If not, send them to https://github.com/signup and wait until they've made one.
+     - Explain that you need them to sign in to GitHub once, so you can keep their config in a private repo.
+     - In Claude Code, they can type `! gh auth login --web` right in the prompt. With other agents, they run `gh auth login --web` in another terminal. It opens the browser and shows a one-time code.
+     - Wait for them, then check `gh auth status` again.
+   - Let git use that GitHub login, calling `gh` by name so it keeps working after `gh` updates and on their other machines:
+
+     ```bash
+     for host in https://github.com https://gist.github.com; do
+       git config --global --replace-all "credential.$host.helper" ''
+       git config --global --add "credential.$host.helper" '!gh auth git-credential'
+     done
+     ```
+
+     Don't use `gh auth setup-git`: it writes this machine's full path to `gh` into the git config. Tell the person in a sentence that git now uses their GitHub login.
    - Get their GitHub username: `gh api user --jq .login`.
    - Ask what first name to use in their README.
 
@@ -39,7 +53,7 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
      gh repo create <username>/my-omarchy --private --source ~/Work/my-omarchy --remote origin
      ```
 
-   - Commit and push, following the person's rules for commits. If they have none yet, ask first.
+   - Commit and push. The new repo's `AGENTS.md` has a "Commits" section with sensible defaults: commit and push each change as soon as they say yes, one change per commit. Use it without asking. Mention once that they can change that section if they'd like to work differently.
 
 4. **Offer a cookbook.** Ask: "Do you want a public cookbook, so you can share your fixes with others?"
    - **If yes:**
@@ -47,8 +61,8 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
      - The template includes an MIT license, so others may reuse the recipes. Mention it, and ask whether they'd prefer another license.
      - Create the repo with `gh repo create <username>/omarchy-cookbook --public --source ~/Work/omarchy-cookbook --remote origin`.
      - Commit and push. It starts empty; the weekly review fills it.
-   - **Then ask:** "Should it be listed in the Omarchy cookbook library, so others can find it?" On yes, run `gh repo edit <username>/omarchy-cookbook --add-topic omarchy-cookbook`. Otherwise, leave the topic off; they can add it any time.
-   - **If no:** leave out the cookbook. The weekly review then skips publishing.
+     - **Then ask:** "Should it be listed in the Omarchy cookbook library, so others can find it?" On yes, run `gh repo edit <username>/omarchy-cookbook --add-topic omarchy-cookbook`. Otherwise, leave the topic off; they can add it any time.
+   - **If no:** leave out the cookbook, and don't ask about the library. The weekly review then skips publishing.
 
 5. **Let the agent reach the other folders.** The agent works from `~/Work/my-omarchy`, but it also reads and writes `~/Work/omarchy-cookbook` and `~/.cache/omarchy-kitchen`, and pushes the cookbook.
    - **Claude Code:** the template's `.claude/settings.json` lists both folders under `permissions.additionalDirectories`. Claude Code uses it after the person trusts the folder the first time they start Claude there.

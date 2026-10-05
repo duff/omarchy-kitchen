@@ -29,6 +29,13 @@ refresh_tree() {
 refresh_tree "$root/config"
 refresh_tree "$root/hosts/$host"
 
+# `gh auth setup-git` writes the full path to this machine's gh, which
+# breaks after a gh update or on another machine. Keep the by-name helper,
+# which works everywhere.
+if [[ -f $root/config/git/config ]]; then
+  sed -i -E 's#^([[:space:]]*helper = )!/[^[:space:]]*/gh auth git-credential$#\1!gh auth git-credential#' "$root/config/git/config"
+fi
+
 # Places people customize, and generated files inside them that aren't
 # customizations.
 watched=(hypr omarchy alacritty foot ghostty kitty git herdr tmux wireplumber starship.toml xdg-terminals.list)
