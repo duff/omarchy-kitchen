@@ -13,6 +13,7 @@ Share your [Omarchy](https://omarchy.org/) customizations as recipes, and pick u
   - new versions of this method
 
   You say yes or no to each. If it's not a good time, tell it when.
+- **Recipes are suggestions.** Your agent solves each problem its own way, fitted to your machine, your software, and how you like things. It borrows from the recipe where that fits.
 - **Recipes from others** get a safety review before you see them.
 - **Anything you apply can be undone.**
 - **The [library](https://github.com/duff/omarchy-library)** lists every public cookbook.

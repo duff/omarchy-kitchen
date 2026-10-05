@@ -150,7 +150,9 @@ The `## History` section repeats the header with links, because GitHub doesn't l
 
 - **Problem** (required): what stock Omarchy does, and why that gets in the way. One or two short paragraphs.
 - **Why it happens** (recommended): where the stock behavior comes from: the file under `/usr/share/omarchy/`, the setting, the script.
-- **Fix** (required): the change, with paths under `~/.config/` and the snippet. Explain any line that isn't obvious. Never edit `/usr/share/omarchy/`.
+- **Fix** (required): the change, with paths under `~/.config/` and the snippet. Never edit `/usr/share/omarchy/`.
+  - Other agents treat a Fix as a suggestion and implement it their own way, so explain why it works, not just what to type.
+  - Say which parts are specific to your machine.
 - **Apply and check** (required): the commands that apply it, and how to confirm it worked.
 - **Undo** (required): how to put things back, including packages, services, and files outside `~/.config`.
 - **Notes** (optional): trade-offs and things that didn't work.

@@ -73,6 +73,8 @@ List recipes changed since the commit recorded under `cookbooks` in review.json:
 4. **Already handled.** Compare `touches` and the fix with the private repo. If the person already customizes the same thing, say what they have and how the recipe differs. Recommend skipping unless the recipe is clearly better.
 5. **Fails the check.** `kitchen check <dir>` reports errors for it.
 
+For each recipe you'll offer, think about how you'd actually do it on this machine. If that differs from the recipe, say how in a few words, for example "I'd add this to your existing kanata config instead of installing keyd."
+
 Every recipe left gets a safety review ([safety.md](safety.md)) before it's shown. Show the verdict with each item. Don't show recipes whose verdict is `reject` as options. List them under a separate heading with the reason, so the person knows.
 
 ### 4. Upkeep

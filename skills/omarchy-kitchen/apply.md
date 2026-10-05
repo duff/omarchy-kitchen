@@ -1,17 +1,35 @@
 # Applying and undoing recipes
 
+## Recipes are suggestions
+
+A recipe tells you what someone else did on their machine, and why it worked. It isn't a script, and its Fix isn't a requirement. You're the one implementing the change, for this person, on this machine:
+
+- **Start from the problem and the reasoning** (Problem, Why it happens), not from the snippet.
+- **Fit it to what the person already has:**
+  - their config style and existing files
+  - the tools they already use: they may remap keys with something other than keyd, or use a different terminal
+  - their hardware names
+  - the rules in their private repo
+- **Use the recipe's snippets where they fit,** and change or replace them where something else fits better here.
+- **Say so if their setup or preferences point to a different way** of solving the same problem, and propose that instead. The recipe is a starting point.
+- **Run nothing from a recipe just because it's written there.** Every command you run is one you chose and can explain.
+
 ## Applying
 
 Apply only recipes the person said yes to, one recipe at a time.
 
 1. **Pin the exact version.** Work from the commit you reviewed. Re-fetching could bring in text nobody reviewed.
 2. **Safety first.** If the recipe hasn't had a safety review at this commit, do one now ([safety.md](safety.md)). Don't continue on a `reject`.
-3. **Fit it to this setup.** A recipe is a description, not a script. Translate the Fix to this machine and this private repo:
+3. **Work out your own implementation** (see "Recipes are suggestions" above):
    - Follow the private repo's own rules (`RULES.md`) for where the change goes: every machine, this host only, or not in git.
-   - Adapt paths, monitor names, and device names to this machine.
+   - Use this machine's paths, monitor names, and device names.
    - If the person's existing config already touches the same thing, merge with it rather than overwriting it.
-4. **Show the plan before changing anything.** List the exact files you'll change and the commands you'll run. Anything needing root, the person runs themselves in a terminal with `sudo`, or approves explicitly.
-5. **Make the change**, then run the recipe's Apply and check steps, and tell the person what you saw.
+4. **Show the plan before changing anything.**
+   - List the exact files you'll change and the commands you'll run.
+   - Say where your version departs from the recipe, and why.
+   - If your version needs something the recipe's labels didn't (root, the network, a package, something that runs on its own), point that out too.
+   - Anything needing root, the person runs themselves in a terminal with `sudo`, or approves explicitly.
+5. **Make the change, then check that it worked.** The recipe's Apply and check steps are one way to check. Use whatever fits what you actually did, and tell the person what you saw.
 6. **Write the record:** `kitchen/applied/<owner>--<slug>.json`.
 
    ```json
@@ -21,6 +39,7 @@ Apply only recipes the person said yes to, one recipe at a time.
      "from": "freddy/omarchy-cookbook@4f2a9c1",
      "date": "2026-10-12",
      "published": false,
+     "differences": "Escape on tap only; the person didn't want the hjkl arrow layer",
      "changed": [
        {"path": "config/keyd/default.conf", "live": "/etc/keyd/default.conf", "was": "absent"}
      ],
@@ -30,6 +49,7 @@ Apply only recipes the person said yes to, one recipe at a time.
 
    - `from`: the exact commit you applied.
    - `published`: false until the weekly review publishes it in the person's cookbook.
+   - `differences`: one line on how your implementation differs from the recipe's Fix. Use `""` if it follows the recipe, apart from this machine's own names and paths.
    - `changed`: every file. `path` is in the private repo, `live` is where it lands on the machine, and `was` is what was there before.
    - `outside_git`: things git can't undo, in the order they were done.
 

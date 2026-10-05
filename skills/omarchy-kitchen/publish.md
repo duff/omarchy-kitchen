@@ -48,7 +48,7 @@ When the weekly review approves an applied recipe (a `kitchen/applied/*.json` re
    {"who": "<owner>", "did": "applied", "date": "<the date it was applied>", "from": "<their-owner>/<their-repo>@<commit>"}
    ```
 
-3. If the person changed the fix after applying it, publish it as **adapted** instead:
+3. If the record's `differences` describes a different approach, or the person changed the fix after applying it, publish it as **adapted** instead. Write the Fix from what was actually done on this machine. Differences that are only this machine's names and paths don't count:
    - The id becomes `<owner>/<slug>`, with `parent:` set to the old id.
    - `version` goes back to 1.
    - Write one line in `## History` saying what changed.
