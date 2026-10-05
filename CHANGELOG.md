@@ -2,6 +2,13 @@
 
 Each version below says what behaves differently, for someone deciding whether to adopt it.
 
+## v0.1.1
+
+- **Recipes are suggestions.** Agents now solve each recipe's problem their own way, fitted to the person's machine, software, and preferences, and use the recipe's snippets only where they fit. The plan shown before applying says where it departs from the recipe. Nothing here lets agents do more: every change still waits for a yes, and the safety review still comes first.
+- **Applied records** gain `differences`, a line on how this machine's version differs from the recipe. The weekly review uses it to publish a copy as applied or adapted.
+- **Writing a Fix:** explain why it works, and which parts are specific to your machine, so other agents can adapt it rather than copy it.
+- **Cookbook template:** includes an MIT license.
+
 ## v0.1.0
 
 The first version.
