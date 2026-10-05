@@ -30,6 +30,7 @@ Apply only recipes the person said yes to, one recipe at a time.
    - Say where your version departs from the recipe, and why.
    - If your version needs something the recipe's labels didn't (root, the network, a package, something that runs on its own), point that out too.
    - Anything needing root, the person runs themselves in a terminal with `sudo`, or approves explicitly.
+   - **When to wait for an OK:** if the plan is what you described when you offered the recipe, their yes covers it; go ahead. If it departs from that in a way they haven't heard, a different approach or extra steps, show the plan and wait for an OK first.
 5. **Make the change, then check that it worked.** The recipe's Apply and check steps are one way to check. Use whatever fits what you actually did, and tell the person what you saw.
 6. **Write the record:** `kitchen/applied/<owner>--<slug>.json`.
 
