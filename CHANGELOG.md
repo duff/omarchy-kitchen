@@ -2,6 +2,10 @@
 
 Each version below says what behaves differently, for someone deciding whether to adopt it.
 
+## Unreleased
+
+- **Cookbook template:** the README no longer claims every change goes in `~/.config/`. Many recipes also write elsewhere, and each recipe's data says exactly what it touches.
+
 ## v0.3.0
 
 - **Format change: `cookbook.json` no longer has `machines`.** A cookbook is a person's customizations, not a description of the machines they use today. Hardware belongs to the recipes that need it, in their `requires` and `applies_to`.
