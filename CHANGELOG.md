@@ -2,6 +2,12 @@
 
 Each version below says what behaves differently, for someone deciding whether to adopt it.
 
+## v0.3.0
+
+- **Format change: `cookbook.json` no longer has `machines`.** A cookbook is a person's customizations, not a description of the machines they use today. Hardware belongs to the recipes that need it, in their `requires` and `applies_to`.
+- **What cookbooks must change:** remove `machines` from `cookbook.json`, and point the check workflow at `duff/omarchy-kitchen@v0.3.0`. A description that names your current machines is worth rewriting too.
+- **Writing recipes:** a recipe that needs particular hardware says so in its title or the first line of its Problem, so people see it without scrolling to the recipe data.
+
 ## v0.2.0
 
 - **Format change: recipe data moves to the end.** The JSON that used to sit between `---` lines at the top of RECIPE.md now goes in a `## Recipe data` section at the end, as one JSON code block. People browsing a recipe on GitHub now see the problem and the fix first.
