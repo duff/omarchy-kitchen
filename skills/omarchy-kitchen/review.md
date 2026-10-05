@@ -11,6 +11,7 @@ The private repo's `AGENTS.md` asks for this check at the start of each session 
 ```
 
 - **`not due`** or **`snoozed`**: say nothing about the review.
+- **Setup still in progress** (the person is finishing setup, and `last_review` is empty): say nothing either. Setup's first look is the first review.
 - **`due`**: in one or two lines, say the review is due and what's waiting (the indented lines from `kitchen due`). Then ask: now, or when? Don't start on anything else first if the person's message is just a greeting. If they came with a task, ask at the end of your reply instead, once.
   - **Now**: run the review below.
   - **Later**: turn their answer into a date and time and snooze it, for example `kitchen snooze 2026-10-09 18:00`. "Tonight" means 18:00 today. "Tomorrow" means 09:00 tomorrow. "This weekend" means Saturday 09:00. Confirm the time in a few words. Until then, sessions stay quiet about the review.
