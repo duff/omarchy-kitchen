@@ -12,10 +12,14 @@ The private repo's `AGENTS.md` asks for this check at the start of each session 
 
 - **`not due`** or **`snoozed`**: say nothing about the review.
 - **Setup still in progress** (the person is finishing setup, and `last_review` is empty): say nothing either. Setup's first look is the first review.
-- **`due`**: in one or two lines, say the review is due and what's waiting (the indented lines from `kitchen due`). Then ask: now, or when? Don't start on anything else first if the person's message is just a greeting. If they came with a task, ask at the end of your reply instead, once.
-  - **Now**: run the review below.
-  - **Later**: turn their answer into a date and time and snooze it, for example `kitchen snooze 2026-10-09 18:00`. "Tonight" means 18:00 today. "Tomorrow" means 09:00 tomorrow. "This weekend" means Saturday 09:00. Confirm the time in a few words. Until then, sessions stay quiet about the review.
+- **`due`**: ask once, in a line: "Your weekly kitchen review is due. Want me to see what's waiting, or tell me when?" Don't start on anything else first if the person's message is just a greeting. If they came with a task, ask at the end of your reply instead.
+  - **See what's waiting:** fetch the cookbooks they follow (as in part 3 below), run `kitchen pending`, and count. Include the indented lines from `kitchen due` for someone with a cookbook. Then say it in a line: "4 new recipes that fit your machine, and 2 you put off. Go through them now, or later?"
+    - **Now:** run the review below.
+    - **Nothing waiting:** say so, then finish the review without anything to go through: update `last_review` and the `cookbooks` commits in review.json, and commit and push it. Their yes to looking covers that. The next nudge comes in a week.
+  - **Later**, at either question: turn their answer into a date and time and snooze it, for example `kitchen snooze 2026-10-09 18:00`. "Tonight" means 18:00 today. "Tomorrow" means 09:00 tomorrow. "This weekend" means Saturday 09:00. Confirm the time in a few words. Until then, sessions stay quiet about the review.
   - **If they don't answer the question**, don't ask again in that session.
+
+The session-start check reads only local files, so it's instant. The network is used only once the person says to look.
 
 A snooze only lives on this machine (`kitchen/snooze` is ignored by git). The review date itself is in `kitchen/review.json`, which is committed, so it moves for every machine.
 
