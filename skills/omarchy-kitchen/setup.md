@@ -120,7 +120,10 @@ Someone who said no to a cookbook at setup can start one any time, often when th
 
 The usual request is a line someone sent them, like "Follow sam-example's cookbook at github.com/sam-example/omarchy-cookbook". Vet the cookbook before adding it to `following`. The link probably came by text or email, and following means its recipes will be offered every week.
 
-1. **Find the repo:** `gh repo view <owner>/<repo> --json isPrivate,description,createdAt,pushedAt`. It has to be public.
+1. **Find the repo.**
+   - **A link or `<owner>/<repo>`:** use it.
+   - **Just a name** ("duff's cookbook"): try `<name>/omarchy-cookbook`, the usual name. If there's no such repo, look for the person in the library's `index.json`, or ask for the link. The next step catches a wrong guess.
+   - **Then:** `gh repo view <owner>/<repo> --json isPrivate,description,createdAt,pushedAt`. It has to be public.
 2. **Confirm the person:** `gh api users/<owner> --jq '{login, name, created_at, public_repos}'`. Show the name and the account's age, and ask whether that's the person they know. Point out anything odd: an account created days ago, a name that doesn't match, or a username one letter off from someone they know.
 3. **Fetch it** into the cache, as in [review.md](review.md) part 3, and note the commit.
 4. **Check the format:** `kitchen check <dir>`. A cookbook that fails isn't in the library either. Say what's wrong, and recommend waiting until the owner fixes it.
