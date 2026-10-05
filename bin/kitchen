@@ -13,7 +13,7 @@ Usage: kitchen <command> [arguments]
   check [COOKBOOK]               Check a cookbook against the recipe format
   scan [--local] [--words FILE] [--cookbook DIR] [PATH...]
                                  Look for private data in files about to be published
-  flags RECIPE_DIR               List warning signs for a safety review
+  flags RECIPE_DIR [--serious]   List warning signs for a safety review
   profile                        Print this machine's facts that recipes can require
   match RECIPE_DIR [--profile FILE]
                                  Say whether a recipe fits this machine: yes, no, or maybe

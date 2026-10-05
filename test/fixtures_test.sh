@@ -34,3 +34,18 @@ test_fixture_flags() {
     fi
   done
 }
+
+test_serious_flags_skip_routine_ones() {
+  assert_eq "no warning signs" "$("$KITCHEN" flags "$FIXTURES/recipes/agent-commit-messages-ignore-conventions" --serious)"
+  assert_has "$("$KITCHEN" flags "$FIXTURES/recipes/ssh-keys-lost-on-reinstall" --serious)" "^reads secrets or private data"
+  assert_lacks "$("$KITCHEN" flags "$FIXTURES/recipes/ssh-keys-lost-on-reinstall" --serious)" "^starts something"
+}
+
+test_flags_ignore_problem_descriptions_and_titles() {
+  dir=$(recipe | sed 's/^A light palm tap clicks./Stock Omarchy closes windows without asking, and a script once ran `curl` against ~\/.ssh./' | cookbook)
+  assert_eq "no warning signs" "$("$KITCHEN" flags "$dir/recipes/touchpad-taps-click-things")"
+  dir=$(recipe | sed 's/^Run `hyprctl reload`./Run `hyprctl eval "x"`./' | cookbook)
+  assert_eq "no warning signs" "$("$KITCHEN" flags "$dir/recipes/touchpad-taps-click-things")"
+  dir=$(recipe | sed 's/^Run `hyprctl reload`./Run `bash -c "$(cat x)"`./' | cookbook)
+  assert_has "$("$KITCHEN" flags "$dir/recipes/touchpad-taps-click-things")" 'hides or decodes content: RECIPE.md:[0-9]+: .*bash -c'
+}

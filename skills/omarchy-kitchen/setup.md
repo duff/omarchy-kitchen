@@ -118,13 +118,14 @@ The usual request is a line someone sent them, like "Follow sam-example's cookbo
 2. **Confirm the person:** `gh api users/<owner> --jq '{login, name, created_at, public_repos}'`. Show the name and the account's age, and ask whether that's the person they know. Point out anything odd: an account created days ago, a name that doesn't match, or a username one letter off from someone they know.
 3. **Fetch it** into the cache, as in [review.md](review.md) part 3, and note the commit.
 4. **Check the format:** `kitchen check <dir>`. A cookbook that fails isn't in the library either. Say what's wrong, and recommend waiting until the owner fixes it.
-5. **Look for trouble.** Run `kitchen flags` on every recipe.
-   - **Up to 15 recipes:** give every one a safety review ([safety.md](safety.md)).
-   - **Larger cookbooks:** review each recipe that has a flag. The rest get their safety review one at a time, just before the weekly review offers them.
-   - Save every verdict (see "Verdicts" in [review.md](review.md)).
+5. **Look for trouble in the recipes that fit.**
+   - **Leave out what doesn't fit:** skip recipes `kitchen match` says `no` to. They'd never be offered, so they don't need vetting.
+   - **Run `kitchen flags --serious` on the rest.** It lists only the signs of a cookbook not to trust: reading secrets, sending data off the machine, fetching code, hidden content, and text aimed at an agent. Root steps and background services are routine, and the labels already say so.
+   - **Review each recipe with a serious flag** ([safety.md](safety.md)), and save every verdict (see "Verdicts" in [review.md](review.md)).
+   - **Every other recipe** gets its safety review just before it's offered, one at a time, as usual.
 6. **Report and recommend,** in a few lines:
-   - how many recipes there are, and how many were reviewed, with the count of each verdict
-   - every `caution` and `reject`, with the line it's about
+   - how many recipes there are, how many fit this machine, and how many you reviewed, with the count of each verdict
+   - every `reject`, with the line it's about. Count the `caution`s but don't list them; each one is explained when its recipe is offered.
    - a recommendation: follow, or don't. One `reject` is enough to recommend not following: a cookbook that ships a malicious recipe isn't one to trust, even if the rest look fine.
 7. **On a yes,** add `<owner>/<repo>` to `following` in `kitchen/settings.json`, then commit and push; the yes covers it.
    - Don't record a commit for it in `kitchen/review.json`. The next weekly review then offers its recipes that fit, reusing the saved verdicts.
