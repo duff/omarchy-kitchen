@@ -53,4 +53,7 @@ for record in "$repo"/kitchen/applied/*.json; do
   applied=$((applied + 1))
   [[ $(jq -r '.published' "$record") == false ]] && queued=$((queued + 1))
 done
-echo "Applied from others: $applied$( ((queued)) && echo " ($queued waiting to be published)")"
+# Only someone with a cookbook publishes, so only they hear about the queue.
+waiting=""
+[[ -f $cookbook/cookbook.json ]] && ((queued)) && waiting=" ($queued waiting to be published)"
+echo "Applied from others: $applied$waiting"

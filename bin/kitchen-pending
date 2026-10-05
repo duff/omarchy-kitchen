@@ -1,0 +1,74 @@
+#!/bin/bash
+
+# kitchen pending [--repo DIR] [--profile FILE]: the recipes from followed
+# cookbooks this person might want, one per line, new ones first:
+#
+#   new|older <TAB> yes|maybe <TAB> <owner/repo> <TAB> <folder> <TAB> <id> <TAB> <version>
+#
+# "new" means added or changed since the last review read that cookbook;
+# "older" means offered before, or not yet reached, and still undecided.
+# Leaves out recipes applied or declined at this version, and ones that
+# don't fit this machine. Reads the fetched cookbooks only; fetch first.
+
+set -o pipefail
+source "$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/../lib/kitchen.sh"
+kitchen_find_repo "$@"
+set -- "${ARGS[@]}"
+repo=$KITCHEN_REPO
+
+profile_file=""
+if [[ ${1:-} == --profile ]]; then
+  profile_file=${2:?}
+else
+  profile_file=$(mktemp)
+  trap 'rm -f "$profile_file"' EXIT
+  "$KITCHEN_ROOT/bin/kitchen-profile" >"$profile_file"
+fi
+
+settings=$(kitchen_settings "$repo")
+cache=$(kitchen_expand "$(jq -r '.cache' <<<"$settings")")
+review="$repo/kitchen/review.json"
+
+new=()
+older=()
+while IFS= read -r cookbook; do
+  [[ -n $cookbook ]] || continue
+  dir="$cache/cookbooks/$cookbook"
+  if [[ ! -d $dir/recipes ]]; then
+    echo "kitchen: $cookbook isn't fetched yet ($dir)" >&2
+    continue
+  fi
+
+  bookmark=$(jq -r --arg c "$cookbook" '.cookbooks[$c] // empty' "$review")
+  changed=""
+  if [[ -n $bookmark ]]; then
+    changed=$(git -C "$dir" diff --name-only "$bookmark" HEAD -- recipes 2>/dev/null | cut -d/ -f2 | sort -u)
+  fi
+
+  for file in "$dir"/recipes/*/RECIPE.md; do
+    [[ -f $file ]] || continue
+    folder=$(basename "$(dirname "$file")")
+    data=$(kitchen_data "$file" | jq -c . 2>/dev/null) || continue
+    id=$(jq -r '.id // empty' <<<"$data")
+    version=$(jq -r '.version // empty' <<<"$data")
+    [[ -n $id && -n $version ]] || continue
+
+    record="$repo/kitchen/applied/${id/\//--}.json"
+    [[ -f $record && $(jq -r '.version' "$record") == "$version" ]] && continue
+    jq -e --arg id "$id" --argjson v "$version" 'any(.declined[]?; .id == $id and .version == $v)' "$review" >/dev/null && continue
+
+    fit=$("$KITCHEN_ROOT/bin/kitchen-match" "$dir/recipes/$folder" --profile "$profile_file" | head -n1)
+    [[ $fit == no ]] && continue
+
+    line=$(printf '%s\t%s\t%s\t%s\t%s' "$fit" "$cookbook" "$folder" "$id" "$version")
+    if [[ -z $bookmark ]] || grep -qxF -- "$folder" <<<"$changed"; then
+      new+=("new	$line")
+    else
+      older+=("older	$line")
+    fi
+  done
+done < <(jq -r '(.following // [])[]' <<<"$settings")
+
+((${#new[@]})) && printf '%s\n' "${new[@]}"
+((${#older[@]})) && printf '%s\n' "${older[@]}"
+exit 0

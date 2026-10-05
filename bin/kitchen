@@ -17,6 +17,8 @@ Usage: kitchen <command> [arguments]
   profile                        Print this machine's facts that recipes can require
   match RECIPE_DIR [--profile FILE]
                                  Say whether a recipe fits this machine: yes, no, or maybe
+  pending [--repo DIR] [--profile FILE]
+                                 List recipes from followed cookbooks still to decide on
   status [--repo DIR]            Describe this person's setup in plain words
   due [--repo DIR]               Say whether the weekly review is due
   snooze WHEN [--repo DIR]       Put the review off until WHEN (YYYY-MM-DD [HH:MM])

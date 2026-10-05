@@ -1,17 +1,17 @@
 #!/bin/bash
 
 # private_repo [last review date] [review_every_days]: a private repo's
-# kitchen files in $TEST_TMP/repo. Prints its path.
+# kitchen files in $TEST_TMP/repo, with a cookbook in $TEST_TMP/cookbook
+# (set NO_COOKBOOK=1 for none). Prints its path.
 private_repo() {
-  local repo="$TEST_TMP/repo"
+  local repo="$TEST_TMP/repo" book="$TEST_TMP/cookbook"
   mkdir -p "$repo/kitchen/applied"
   jq -n --arg last "${1:-}" '{last_review: (if $last == "" then null else $last end), reviewed_through: null}' \
     >"$repo/kitchen/review.json"
-  if [[ -n ${2:-} ]]; then
-    echo "{\"review_every_days\": $2}" >"$repo/kitchen/settings.json"
-  else
-    echo '{"github": "duff"}' >"$repo/kitchen/settings.json"
-  fi
+  [[ -n ${NO_COOKBOOK:-} ]] || { mkdir -p "$book" && echo '{"owner": "duff"}' >"$book/cookbook.json"; }
+  jq -n --arg book "$book" --arg every "${2:-}" \
+    '{github: "duff", cookbook: $book} + (if $every == "" then {} else {review_every_days: ($every | tonumber)} end)' \
+    >"$repo/kitchen/settings.json"
   echo "$repo"
 }
 
@@ -60,8 +60,17 @@ test_waiting_counts_commits_and_queued_recipes() {
   git -C "$repo" add -A && git -C "$repo" commit -qm "Change input"
   echo '{"id": "sam/x", "published": false}' >"$repo/kitchen/applied/sam--x.json"
   git -C "$repo" add -A && git -C "$repo" commit -qm "Only kitchen files"
+  mkdir -p "$repo/config/omarchy" && echo y >"$repo/config/omarchy/shell.json"
+  echo '{"id": "sam/y", "published": false}' >"$repo/kitchen/applied/sam--y.json"
+  git -C "$repo" add -A && git -C "$repo" commit -qm "Apply recipe sam/y"
 
   output=$(due "$repo")
   assert_has "$output" "^  1 commit since the last review$"
-  assert_has "$output" "^  1 applied recipe waiting to be published$"
+  assert_has "$output" "^  2 applied recipes waiting to be published$"
+}
+
+test_without_a_cookbook_nothing_waits_to_be_published() {
+  repo=$(NO_COOKBOOK=1 private_repo 2026-09-01)
+  echo '{"id": "sam/x", "published": false}' >"$repo/kitchen/applied/sam--x.json"
+  assert_eq "due: the weekly review was due on 2026-09-08 (last review 2026-09-01)" "$(due "$repo")"
 }

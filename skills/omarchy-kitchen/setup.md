@@ -70,7 +70,7 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
 
 6. **Follow cookbooks.** Add the ones the person named to `following` in `kitchen/settings.json`, as `<owner>/<repo>`, normally `<owner>/omarchy-cookbook`. Mention that they can browse the library for more any time.
 
-7. **Run a first review now,** if they'd like. With nothing published yet, it's mostly part 3: recipes from the cookbooks they follow that fit their machine.
+7. **Offer a first look at those recipes now,** if they'd like. It's the weekly review's one-at-a-time walk-through ([review.md](review.md)), and they can stop whenever they like. Whatever they don't get to waits for next time.
 
 8. **Explain how it works from here,** in three or four lines, using `kitchen status`:
    - Once a week, opening their agent in `~/Work/my-omarchy` offers a review. They can say when, if not now.

@@ -42,13 +42,21 @@ else
 fi
 
 # What a review would look at, from local data only (no network at session
-# start): commits since the last review that touch more than kitchen/, and
-# applied recipes not yet published.
+# start). Only people with a cookbook publish, so only they hear about
+# changes worth sharing: commits since the last review, leaving out ones
+# that only touch kitchen/ and ones that apply or undo a recipe (those are
+# published as applied copies instead), plus applied recipes not yet
+# published.
+cookbook=$(kitchen_expand "$(kitchen_settings "$repo" | jq -r '.cookbook')")
+[[ -f $cookbook/cookbook.json ]] || exit 0
+
 through=$(jq -r '.reviewed_through // empty' "$repo/kitchen/review.json")
 if [[ -n $through ]]; then
   commits=0
   while IFS= read -r sha; do
-    git -C "$repo" show --name-only --format= "$sha" | grep -qv '^kitchen/' && commits=$((commits + 1))
+    changed=$(git -C "$repo" show --name-only --format= "$sha")
+    grep -q '^kitchen/applied/' <<<"$changed" && continue
+    grep -qv '^kitchen/' <<<"$changed" && commits=$((commits + 1))
   done < <(git -C "$repo" log --format=%H "$through..HEAD" 2>/dev/null)
   ((commits)) && echo "  $commits commit$([[ $commits == 1 ]] || echo s) since the last review"
 fi
