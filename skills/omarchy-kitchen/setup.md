@@ -30,6 +30,7 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
      - `{{name}}`
      - `{{version}}`: the tag you checked out
      - `{{home}}`: their home folder, as an absolute path
+     - `{{year}}`: this year
    - Run `./snapshot.sh`. It lists files that differ from stock Omarchy. Go through them with the person, and sort each one by RULES.md: every machine (`config/`), this machine only (`hosts/<hostname>/`), or not in git. Explain the choice in a few words for each.
    - Ask, then create the GitHub repo. It is **private**:
 
@@ -43,6 +44,7 @@ The usual request is "Set me up with Omarchy cookbooks from github.com/duff/omar
 4. **Offer a cookbook.** Ask: "Do you want a public cookbook, so you can share your fixes with others?"
    - **If yes:**
      - Copy `templates/omarchy-cookbook/` to `~/Work/omarchy-cookbook`, and fill in the placeholders.
+     - The template includes an MIT license, so others may reuse the recipes. Mention it, and ask whether they'd prefer another license.
      - Create the repo with `gh repo create <username>/omarchy-cookbook --public --source ~/Work/omarchy-cookbook --remote origin`.
      - Commit and push. It starts empty; the weekly review fills it.
    - **Then ask:** "Should it be listed in the Omarchy cookbook library, so others can find it?" On yes, run `gh repo edit <username>/omarchy-cookbook --add-topic omarchy-cookbook`. Otherwise, leave the topic off; they can add it any time.
