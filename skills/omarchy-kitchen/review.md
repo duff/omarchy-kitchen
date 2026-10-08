@@ -27,7 +27,7 @@ When the review is more than a week overdue, lead with how much has piled up whe
 
 ## The review
 
-The review is a conversation, one item at a time. Each item is a problem described in plain words, so the person can tell quickly whether they care. Do the reading quietly first. Then walk through the items, and let the person stop whenever they like.
+The review is a conversation. Method updates and recipes from others come one item at a time. The person's own changes come as one list they can publish all at once (part 2). Each item is a problem described in plain words, so the person can tell quickly whether they care. Do the reading quietly first. Then walk through the items, and let the person stop whenever they like.
 
 Read `kitchen/settings.json` (merged over the method's `defaults.json`) and `kitchen/review.json`.
 
@@ -52,8 +52,8 @@ Skip this part if the person has no cookbook, meaning no `cookbook.json` at the 
 - **Changes since the last review.** List the commits with `git log --reverse <reviewed_through>..HEAD`.
   - Leave out commits that only touch `kitchen/`.
   - Leave out commits that touch `kitchen/applied/`: they apply or undo someone else's recipe, and come back as applied copies instead.
-  - For each change that's left, decide whether it's worth sharing as a new recipe or as an update to one of theirs. Follow [publish.md](publish.md), and note what you'd leave out or generalize for privacy. Keep a short reason for each change you won't offer: private, housekeeping, or too small.
-- **Applied recipes waiting to be published.** These are files in `kitchen/applied/` with `"published": false`, for recipes that are still applied. Offer each as an `applied` copy, or as `adapted` if their version differs (see `differences`).
+  - For each change that's left, decide whether it's worth sharing as a new recipe or as an update to one of theirs. Follow [publish.md](publish.md), and note what you'd leave out or generalize for privacy. Keep a short reason for each change you won't offer: private, housekeeping, too small, or temporary (a workaround for a bug that's about to be fixed upstream).
+- **Applied recipes waiting to be published.** These are files in `kitchen/applied/` with `"published": false`, for recipes that are still applied. List each as an `applied` copy, or as `adapted` if their version differs (see `differences`).
 
 ### 3. Recipes from cookbooks they follow
 
@@ -137,7 +137,7 @@ When the person chooses to go through their own changes one by one, each reads t
 **Answers:**
 - **Apply, publish, or adopt:** do it now, then go to the next item.
   - **A recipe:** follow [apply.md](apply.md).
-  - **Their changes:** shown as one list, not one at a time. Follow "Offering what to publish" in [publish.md](publish.md). Their answer (all, some, or one by one) covers committing and pushing what it names to the cookbook.
+  - **Their changes:** shown as one list, not one at a time. Follow "Offering what to publish" in [publish.md](publish.md). An answer of all, or of the ones they pick, covers committing and pushing those to the cookbook. Going one by one, only a "publish" for an item covers it.
   - **A method update:**
     - `git -C ~/.local/share/omarchy-kitchen checkout --quiet <tag>`, then run `~/.local/share/omarchy-kitchen/install`.
     - Set `"method": "<tag>"` in `kitchen/settings.json`.

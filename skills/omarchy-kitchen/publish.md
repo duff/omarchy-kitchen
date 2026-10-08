@@ -1,22 +1,22 @@
 # Publishing recipes
 
-A recipe is a public write-up of one problem and its fix, drawn from the person's private repo. Nothing is written to the cookbook until the person has said yes to it, in the weekly review or when they ask what there is to publish.
+A recipe is a public write-up of one problem and its fix, drawn from the person's private repo. Nothing is written to the cookbook until the person has said yes to it: in the weekly review, after asking what there is to publish, or by asking to publish something directly.
 
 ## Offering what to publish
 
-Publishing their own work should be easy, so offer it as one list, not item by item:
+Offer the person's own changes as one list, not item by item:
 
-1. **Show the list,** grouped:
+1. **Show the list,** grouped, and numbered straight through all the groups so they can pick by number:
    - **New recipes:** the problem in their words, and what the fix does, in a line each.
    - **Updates to recipes already in their cookbook:** what changes in each.
    - **Recipes they applied from others,** to publish as `applied` or `adapted` copies.
    - Mention anything you'd leave out or generalize for privacy.
 2. **Then say what's left out, and why,** in a line or two, grouped by reason: private, housekeeping, too small, or temporary (a workaround for a bug that's about to be fixed upstream).
 3. **Ask once:** publish them all, pick some ("all but 3", "just 1 and 5"), or go through them one by one.
-   - **All, or the ones they pick:** write each one as below, run the checks once over the whole cookbook, and commit and push, one commit per recipe. Their answer is the yes for every item it names, and the ask to commit and push them. Don't stop to show each draft unless they ask to see them first.
-   - **One by one:** offer each in turn as in [review.md](review.md), with publish, skip, later, or ask.
+   - **All, or the ones they pick:** their answer is the yes for every item it names, and the ask to commit and push them. The line in the list stands in for the draft, so don't show each draft unless they ask to see them first. Write each one with the steps that fit it: "Writing a new recipe" below for new recipes and updates, and "Publishing a recipe applied from someone else" for applied copies. Write and check all of them before pushing any, then commit them, one commit per recipe, and push.
+   - **One by one:** each item gets its own answer, as in [review.md](review.md): publish, skip, later, or ask. Only "publish" covers committing and pushing that item.
 
-If the checks find something, fix it and say what you changed. If a privacy finding can't be generalized away, stop and ask before publishing that one.
+After the yes, change a recipe's text only to fix what `kitchen check` reports or to generalize a privacy finding, and say what you changed. If a privacy finding can't be generalized away, never add it to `allow` on your own: hold that recipe back, show the person the finding, and ask. Publish the rest.
 
 ## Nothing private, ever
 
@@ -50,8 +50,8 @@ When the technique is useful but the example is private, generalize it: "two log
    $K scan --local --words <private-repo>/kitchen/private-words --cookbook <cookbook>
    ```
 
-   Fix everything `check` reports. For each `scan` finding, generalize the text, or, if it's truly fine to publish, add the exact string to `allow` in `cookbook.json` and say so to the person.
-6. Show the person what will be published, if they haven't already seen the draft. Then commit and push the cookbook, following their rules for how to write commits. Their yes to publishing this item is the ask to commit and push it.
+   Fix everything `check` reports. For each `scan` finding, generalize the text. If the string is truly fine to publish, show it to the person and ask; only on their yes, add the exact string to `allow` in `cookbook.json`.
+6. Show the person what will be published, unless they've already seen the draft or said yes to it from the list in "Offering what to publish". Then commit and push the cookbook, following their rules for how to write commits. Their yes to publishing this item is the ask to commit and push it.
 
 ## Publishing a recipe applied from someone else
 
