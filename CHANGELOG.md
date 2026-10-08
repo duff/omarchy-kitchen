@@ -2,6 +2,14 @@
 
 Each version below says what behaves differently, for someone deciding whether to adopt it.
 
+## v0.6.1
+
+- **A privacy finding always stops to ask.** v0.6.0 said this, but publishing still let the agent add a flagged word to the cookbook's public `allow` list and only mention it. Now the agent shows the finding and asks, and adds to `allow` only on a yes. This tightens privacy.
+- **"One by one" means one answer per item.** v0.6.0's review guide could be read as "one by one" covering every item on the list. Now only "all", or the items picked, count as a yes to push them; going one by one, each item needs its own "publish".
+- **Publishing all at once follows the right steps.** Applied copies keep their source and history instead of being rewritten as new recipes. The list replaces each draft, so drafts aren't shown one by one. Everything is written and checked before anything is pushed. After the yes, the text changes only to fix check findings or generalize private details.
+- **Asking directly still works.** "Publish the mouse fix" is a yes, as before; v0.6.0 had narrowed it to the review and "what is there to publish?".
+- **Smaller fixes:** the list is numbered so "all but 3" works, "temporary" is a reason to leave a change out in both guides, and the review guide no longer says everything is one item at a time.
+
 ## v0.6.0
 
 - **Publishing your own changes is one question, not one per change.** The review (or asking "anything to publish?") lists every change worth sharing (new recipes, updates to your recipes, and recipes you applied from others) with what's left out and why. Then it asks once: publish them all, pick some, or go one by one. Answering "all" publishes and pushes each listed recipe without showing each draft first. This lets the agent publish several recipes on one yes, where before each needed its own. The privacy scan and `kitchen check` still run on every recipe, and a privacy finding that can't be generalized away still stops to ask. Recipes from other cookbooks and method updates are still offered one at a time.
