@@ -1,6 +1,6 @@
 # The weekly review
 
-One pass a week covers everything: what to publish, what's new in followed cookbooks, upkeep, and new versions of this method. The person answers once, item by item.
+One pass a week covers everything: what to publish, what's new in followed cookbooks, upkeep, and new versions of this method. Their own changes come as one list they can publish all at once. Everything else is one item at a time.
 
 ## At the start of a session
 
@@ -104,13 +104,13 @@ A safety verdict holds for exactly the recipe it reviewed. Save each one in `~/.
 
 **Open with two or three lines:** what's waiting, and how it works. For example:
 
-> This week there's a new version of the method, one change of yours worth sharing, and 4 new recipes from duff's cookbook that fit your machine. I'll go one at a time. For each, say apply, skip, later, or ask me anything, and say stop whenever you like.
+> This week there's a new version of the method, 3 changes of yours worth sharing, and 4 new recipes from duff's cookbook that fit your machine. I'll show your changes as a list you can publish all at once, then go through the rest one at a time. For each, say apply, skip, later, or ask me anything, and say stop whenever you like.
 
 The first time (`last_review` is empty), add that this review comes back once a week.
 
 **Order:**
 1. the method update
-2. their changes worth sharing
+2. their changes worth sharing, as one list ([publish.md](publish.md))
 3. new and changed recipes from cookbooks they follow, in the order from your quick pass
 4. upkeep
 5. Then, if `kitchen pending` listed `later` or `older` recipes, ask whether to keep going: "There are 12 more from earlier you haven't decided on. Keep going, or leave them for another time?" Go through the `later` ones first.
@@ -132,12 +132,12 @@ For example:
 >
 > Apply, skip, later, or ask me about it?
 
-Their own changes read the same way: "On Oct 4 you made the mouse less jumpy. Worth sharing as a recipe? I'd leave out your mouse's model name." So does a method update: what will work differently for them, in plain words.
+When the person chooses to go through their own changes one by one, each reads the same way: "On Oct 4 you made the mouse less jumpy. Worth sharing as a recipe? I'd leave out your mouse's model name." So does a method update: what will work differently for them, in plain words.
 
 **Answers:**
 - **Apply, publish, or adopt:** do it now, then go to the next item.
   - **A recipe:** follow [apply.md](apply.md).
-  - **Their change:** follow [publish.md](publish.md). The yes covers committing and pushing it to the cookbook.
+  - **Their changes:** shown as one list, not one at a time. Follow "Offering what to publish" in [publish.md](publish.md). Their answer (all, some, or one by one) covers committing and pushing what it names to the cookbook.
   - **A method update:**
     - `git -C ~/.local/share/omarchy-kitchen checkout --quiet <tag>`, then run `~/.local/share/omarchy-kitchen/install`.
     - Set `"method": "<tag>"` in `kitchen/settings.json`.

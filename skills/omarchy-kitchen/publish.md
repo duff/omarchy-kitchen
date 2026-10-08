@@ -1,6 +1,22 @@
 # Publishing recipes
 
-A recipe is a public write-up of one problem and its fix, drawn from the person's private repo. Nothing is written to the cookbook until the person has said yes to that item in the weekly review, or asked for it directly.
+A recipe is a public write-up of one problem and its fix, drawn from the person's private repo. Nothing is written to the cookbook until the person has said yes to it, in the weekly review or when they ask what there is to publish.
+
+## Offering what to publish
+
+Publishing their own work should be easy, so offer it as one list, not item by item:
+
+1. **Show the list,** grouped:
+   - **New recipes:** the problem in their words, and what the fix does, in a line each.
+   - **Updates to recipes already in their cookbook:** what changes in each.
+   - **Recipes they applied from others,** to publish as `applied` or `adapted` copies.
+   - Mention anything you'd leave out or generalize for privacy.
+2. **Then say what's left out, and why,** in a line or two, grouped by reason: private, housekeeping, too small, or temporary (a workaround for a bug that's about to be fixed upstream).
+3. **Ask once:** publish them all, pick some ("all but 3", "just 1 and 5"), or go through them one by one.
+   - **All, or the ones they pick:** write each one as below, run the checks once over the whole cookbook, and commit and push, one commit per recipe. Their answer is the yes for every item it names, and the ask to commit and push them. Don't stop to show each draft unless they ask to see them first.
+   - **One by one:** offer each in turn as in [review.md](review.md), with publish, skip, later, or ask.
+
+If the checks find something, fix it and say what you changed. If a privacy finding can't be generalized away, stop and ask before publishing that one.
 
 ## Nothing private, ever
 

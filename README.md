@@ -12,7 +12,7 @@ Share your [Omarchy](https://omarchy.org/) customizations as recipes, and pick u
   - new recipes from cookbooks you follow, if they fit your machine and you don't already have something better
   - new versions of this method
 
-  It goes through them one at a time, each described as a problem in plain words, and you say apply, skip, later, or ask about it. Stop whenever you like; the rest waits. If it's not a good time, tell it when.
+  Your own changes come as one list, and you can publish them all at once, pick some, or go one by one. Everything else goes one at a time, each described as a problem in plain words, and you say apply, skip, later, or ask about it. Stop whenever you like; the rest waits. If it's not a good time, tell it when.
 - **Recipes are suggestions.** Your agent solves each problem its own way, fitted to your machine, your software, and how you like things. It borrows from the recipe where that fits.
 - **Recipes from others** get a safety review before you see them.
 - **Anything you apply can be undone.**
