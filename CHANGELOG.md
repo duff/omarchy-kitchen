@@ -2,6 +2,10 @@
 
 Each version below says what behaves differently, for someone deciding whether to adopt it.
 
+## v0.6.0
+
+- **Publishing your own changes is one question, not one per change.** The review (or asking "anything to publish?") lists every change worth sharing (new recipes, updates to your recipes, and recipes you applied from others) with what's left out and why. Then it asks once: publish them all, pick some, or go one by one. Answering "all" publishes and pushes each listed recipe without showing each draft first. This lets the agent publish several recipes on one yes, where before each needed its own. The privacy scan and `kitchen check` still run on every recipe, and a privacy finding that can't be generalized away still stops to ask. Recipes from other cookbooks and method updates are still offered one at a time.
+
 ## v0.5.0
 
 - **Vetting is quick.** Before following a cookbook, the agent vets only the recipes that fit this machine, and fully reviews only those with serious warning signs: reading secrets, sending data off the machine, fetching code, hidden content, or text aimed at an agent. Everything else is reviewed one at a time, just before it's offered. For duff's cookbook on a Framework laptop, that's 4 reviews instead of 36. The report lists rejects and only counts cautions.
