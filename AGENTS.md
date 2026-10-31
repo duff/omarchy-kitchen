@@ -18,5 +18,6 @@ If someone asked you to set them up with Omarchy cookbooks, you're in the wrong 
 
 1. Add a section to `CHANGELOG.md`, written for someone deciding whether to adopt it. Cover what behaves differently, and anything that lets agents do more.
 2. Tag it `vX.Y.Z`, and push the tag. Cookbooks reference the action by tag. Templates say `{{version}}`, which setup fills in from the tag it installed.
+3. Move [omarchy-library](https://github.com/duff/omarchy-library) to the new tag: change `ref:` in its `.github/workflows/build.yml` and `test.yml`, run its `test/run` with `KITCHEN_DIR` at the new tag, push, and start its "Build the index" workflow. The library checks every listed cookbook with its tag, not the cookbook's own, so it stays on the old rules until it moves. Its daily build opens an issue when it falls behind.
 
-A breaking format change bumps the minor version while this is 0.x.
+A breaking format change bumps the minor version while this is 0.x. Moving the library then lists cookbooks still on the old format under "Not passing the check" until they convert, so say so in the changelog entry.
